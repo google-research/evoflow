@@ -14,7 +14,7 @@
 
 from geneflow import GeneFlow
 import geneflow.backend as B
-from geneflow.ops import RandomInputs, RandomMutations, UniformCrossover
+from geneflow.ops import RandomInputs, RandomMutations, UniformCrossover1D
 from geneflow.selection import SelectFittest
 from geneflow.fitness import SumGenes
 
@@ -26,7 +26,7 @@ def test_helloworld():
 
     inputs = RandomInputs((POPULATION_SIZE, GENE_SIZE), max_value=1)
     x = RandomMutations(max_gene_value=1)(inputs)
-    outputs = UniformCrossover()(x)
+    outputs = UniformCrossover1D()(x)
     gf = GeneFlow(inputs, outputs, debug=0)
     fitness_function = SumGenes(expected_max_value=GENE_SIZE)
     evolution_strategy = SelectFittest()

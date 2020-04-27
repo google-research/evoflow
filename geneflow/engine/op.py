@@ -16,9 +16,9 @@ import abc
 import random
 import hashlib
 from time import time
-from geneflow.backend import tensor
 from geneflow.utils import box, unbox
 from geneflow.io import print_debug
+from geneflow import backend as B
 
 
 class OP(object):
@@ -77,8 +77,10 @@ class OP(object):
             # eager mode
             self.print_debug('eager mode')
 
-            # ensure all ops are tensors
-            ops = [tensor(op) for op in ops]
+            # check inputs are valis
+            for op in ops:
+                if not B.is_tensor(op):
+                    raise ValueError("Expecting list(tensors) or a tensor")
 
             # input shapes
             input_shapes = []

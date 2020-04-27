@@ -26,6 +26,8 @@ from .inputs import RandomInputs  # noqa: F401
 from .mutation import RandomMutations  # noqa: F401
 
 # crossover
-from .crossover import UniformCrossover  # noqa: F401
+from .uniform_crossover import UniformCrossover1D  # noqa: F401
+from .uniform_crossover import UniformCrossover2D  # noqa: F401
+from .uniform_crossover import UniformCrossover3D  # noqa: F401
 from .crossover import SingleCrossover  # noqa: F401
 from .crossover import DualCrossover  # noqa: F401

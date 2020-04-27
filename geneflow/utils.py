@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 def box(a):
-    "box single element into a list"
+    "box single tensor into a list"
     if isinstance(a, list):
         return a
     else:
