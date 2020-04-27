@@ -85,22 +85,26 @@ def normal(shape, mean=0.0, dev=1.0):
 
 
 # - Reduce -
-
-
-def dot(t1, t2):
-    """Return the dot product of two arrays
+def prod(tensor, axis=None,  dtype=None, out=None, keepdims=False):
+    """Returns the product of an array along a given axis.
 
     Args:
-        t1 (ndarray): Left tensor
-        t2 (ndarray): Right tensor
+        tensor (ndarray): Array to take the maximum.
+        axis (int): Along which axis to take the maximum. The flattened array
+            is used by default. Defaults to None.
+        dtype: Data type specifier.
+        out (ndarray): Output array. Default to None.
+        keepdims (bool): If ``True``, the axis is kept as an axis of
+        size one. Default to False.
 
-    Return:
-        ndarray: tensor containing the dot product
+    Returns:
+        ndarray: The maximum of ``tensor``, along the axis if specified.
     """
-    return np.dot(t1, t2)
+    return np.prod(tensor, axis=axis, out=out, keepdims=keepdims,
+                   dtype=dtype)
 
 
-def max(tensor, axis=None, out=None, keepdims=False, dtype=None):
+def max(tensor, axis=None, out=None, keepdims=False):
     """Returns the maximum of an array or the maximum along an axis.
 
     Note::
@@ -111,6 +115,7 @@ def max(tensor, axis=None, out=None, keepdims=False, dtype=None):
         tensor (ndarray): Array to take the maximum.
         axis (int): Along which axis to take the maximum. The flattened array
             is used by default. Defaults to None.
+        dtype: Data type specifier.
         out (ndarray): Output array. Default to None.
 
         keepdims (bool): If ``True``, the axis is kept as an axis of
@@ -122,7 +127,7 @@ def max(tensor, axis=None, out=None, keepdims=False, dtype=None):
     return np.amax(tensor, axis=axis, out=out, keepdims=keepdims)
 
 
-def min(tensor, axis=None, out=None, keepdims=False, dtype=None):
+def min(tensor, axis=None, out=None, keepdims=False):
     """Returns the minimum of an array or the maximum along an axis.
 
     Note::
@@ -221,6 +226,10 @@ def concatenate(tup, axis=0):
 
 # - Utils -
 
+def reshape(tensor, shape):
+    "reshape tensor"
+    return np.reshape(tensor, shape)
+
 
 def is_tensor(a):
     "check if the given object is a tensor"
@@ -251,10 +260,22 @@ def allclose(a, b, absolute_tolerance=0.1):
         absolute_tolerance: Defined as abs(a[i]-b[i]) < absolute_tolerance.
 
     """
-    return np.allclose(a, b, atol=absolute_tolerance, rtol=0) 
+    return np.allclose(a, b, atol=absolute_tolerance, rtol=0)
 
 
 # - Math -
+
+def dot(t1, t2):
+    """Return the dot product of two arrays
+
+    Args:
+        t1 (ndarray): Left tensor
+        t2 (ndarray): Right tensor
+
+    Return:
+        ndarray: tensor containing the dot product
+    """
+    return np.dot(t1, t2)
 
 
 def add(tensor1, tensor2, dtype=None):

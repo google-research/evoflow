@@ -88,22 +88,27 @@ def normal(shape, mean=0.0, dev=1.0):
 
 
 # - Reduce -
-
-def dot(t1, t2):
-    """Return the dot product of two arrays
+def prod(tensor, axis=None,  dtype=None, out=None, keepdims=False):
+    """Returns the product of an array along a given axis.
 
     Args:
-        t1 (ndarray): Left tensor
-        t2 (ndarray): Right tensor
+        tensor (ndarray): Array to take the maximum.
+        axis (int): Along which axis to take the maximum. The flattened array
+            is used by default. Defaults to None.
+        dtype: Data type specifier.
+        out (ndarray): Output array. Default to None.
+        keepdims (bool): If ``True``, the axis is kept as an axis of
+        size one. Default to False.
 
-    Return:
-        ndarray: tensor containing the dot product
+    Returns:
+        ndarray: The maximum of ``tensor``, along the axis if specified.
     """
-    return cp.dot(t1, t2)
+    return cp.prod(tensor, axis=axis, out=out, keepdims=keepdims,
+                   dtype=dtype)
 
 
-def max(tensor, axis=None, out=None, keepdims=False, dtype=None):
-    """Returns the maximum of an array or the maximum along an axis.
+def max(tensor, axis=None, out=None, keepdims=False):
+    """Returns the maximum of an array or the maximum along a given axis.
 
     Note::
        When at least one element is NaN, the corresponding min value will be
@@ -114,7 +119,6 @@ def max(tensor, axis=None, out=None, keepdims=False, dtype=None):
         axis (int): Along which axis to take the maximum. The flattened array
             is used by default. Defaults to None.
         out (ndarray): Output array. Default to None.
-
         keepdims (bool): If ``True``, the axis is kept as an axis of
         size one. Default to False.
 
@@ -156,7 +160,7 @@ def min(tensor, axis=None, out=None, keepdims=False):
         return cp.amin(tensor, axis=axis, out=out, keepdims=keepdims)
 
 
-def sum(tensor, axis=None, dtype=None, out=None, keepdims=False):
+def sum(tensor, axis=None,  dtype=None, out=None, keepdims=False):
     """Returns the sum of an array along given axes.
 
     Args:
@@ -166,6 +170,7 @@ def sum(tensor, axis=None, dtype=None, out=None, keepdims=False):
         out (cupy.ndarray): Output array.
         keepdims (bool): If ``True``, the specified axes are remained as axes
         of length one.
+
 
     Returns:
         ndarray: The sum of ``tensor``, along the axis if specified.
@@ -179,10 +184,11 @@ def mean(tensor, axis=None, dtype=None, out=None, keepdims=False):
     Args:
         tensor (ndarray): Array to mean reduce.
         axis (int or sequence of ints): Axes along which the sum is taken.
-        dtype: Data type specifier.
         out (cupy.ndarray): Output array.
+        dtype: Data type specifier.
         keepdims (bool): If ``True``, the specified axes are remained as axes
         of length one.
+        dtype: Data type specifier.
 
     Returns:
         ndarray: The mean of ``tensor``, along the axis if specified.
@@ -232,6 +238,9 @@ def concatenate(tup, axis=0):
 
 
 # - Utils -
+def reshape(tensor, shape):
+    "reshape tensor"
+    return cp.reshape(tensor, shape)
 
 
 def is_tensor(a):
@@ -267,6 +276,17 @@ def allclose(a, b, absolute_tolerance=0.1):
 
 
 # - Math -
+def dot(t1, t2):
+    """Return the dot product of two arrays
+
+    Args:
+        t1 (ndarray): Left tensor
+        t2 (ndarray): Right tensor
+
+    Return:
+        ndarray: tensor containing the dot product
+    """
+    return cp.dot(t1, t2)
 
 
 def add(tensor1, tensor2, dtype=None):

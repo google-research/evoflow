@@ -22,7 +22,7 @@ from .load_backend import full  # noqa: F401
 from .load_backend import normal  # noqa: F401
 
 # - reduce -
-from .load_backend import dot  # noqa: F401
+from .load_backend import prod  # noqa: F401
 from .load_backend import max  # noqa: F401
 from .load_backend import min  # noqa: F401
 from .load_backend import sum  # noqa: F401
@@ -34,11 +34,13 @@ from .load_backend import tensor  # noqa: F401
 from .load_backend import concatenate  # noqa: F401
 
 # - Utils -
+from .load_backend import reshape  # noqa: F401
 from .load_backend import is_tensor  # noqa: F401
 from .load_backend import tensor_equal  # noqa: F401
 from .load_backend import allclose  # noqa: F401
 
 # - Math -
+from .load_backend import dot  # noqa: F401
 from .load_backend import add  # noqa: F401
 from .load_backend import subtract  # noqa: F401
 from .load_backend import multiply  # noqa: F401
