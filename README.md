@@ -24,8 +24,8 @@ the population. Equivalent to a model architecture in deep-learning settings.
 ## Deep-learning versus Evoluationary algorithms.
 
 Generally you want to use Deep-learning when the problem is continious/smooth
-and evoluationary algorithm when the problem is discrete. For example voice
-generation is smooth and polynome resolution is discrete.
+and evoluationary algorithms when the problem is discrete. For example voice
+generation is smooth and solving (non-linear) equations is discrete.
 
 ## Disclaimer
 
