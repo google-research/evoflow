@@ -54,6 +54,7 @@ from .load_backend import norm  # noqa: F401
 # - Randomness -
 from .load_backend import randint  # noqa: F401
 from .load_backend import shuffle  # noqa: F401
+from .load_backend import full_shuffle  # noqa: F401
 
 # - Indexing -
 from .load_backend import take  # noqa: F401

@@ -14,8 +14,8 @@
 
 import numpy as np
 
-
 # -initialization-
+
 
 def copy(tensor):
     """Copy a tensor
@@ -85,7 +85,7 @@ def normal(shape, mean=0.0, dev=1.0):
 
 
 # - Reduce -
-def prod(tensor, axis=None,  dtype=None, out=None, keepdims=False):
+def prod(tensor, axis=None, dtype=None, out=None, keepdims=False):
     """Returns the product of an array along a given axis.
 
     Args:
@@ -100,8 +100,7 @@ def prod(tensor, axis=None,  dtype=None, out=None, keepdims=False):
     Returns:
         ndarray: The maximum of ``tensor``, along the axis if specified.
     """
-    return np.prod(tensor, axis=axis, out=out, keepdims=keepdims,
-                   dtype=dtype)
+    return np.prod(tensor, axis=axis, out=out, keepdims=keepdims, dtype=dtype)
 
 
 def max(tensor, axis=None, out=None, keepdims=False):
@@ -226,6 +225,7 @@ def concatenate(tup, axis=0):
 
 # - Utils -
 
+
 def reshape(tensor, shape):
     "reshape tensor"
     return np.reshape(tensor, shape)
@@ -264,6 +264,7 @@ def allclose(a, b, absolute_tolerance=0.1):
 
 
 # - Math -
+
 
 def dot(t1, t2):
     """Return the dot product of two arrays
@@ -416,13 +417,35 @@ def randint(low, high=None, shape=None, dtype='l'):
     return np.random.randint(low, high=high, size=shape, dtype=dtype)
 
 
-def shuffle(tensor):
-    """Shuffle a tensor
+def shuffle(tensor, axis=0):
+    """Shuffle in place a tensor along a given axis. Other axis remain
+    in place.
+
 
     Args:
         tensor (ndarray): tensor to shuffle.
+        axis (int, optional): axis to shuffle on. Default to 0.
+
+    Returns:
+        None: in place shuffling
     """
-    np.random.shuffle(tensor)
+    rng = np.random.default_rng()
+    rng.shuffle(tensor, axis=axis)
+
+
+def full_shuffle(tensor):
+    """Shuffle in place a tensor along all of its axis
+
+    Args:
+        tensor (ndarray): tensor to shuffle.
+
+    Returns:
+        None: in place shuffling
+
+    """
+
+    for idx in range(len(tensor.shape)):
+        shuffle(tensor, axis=idx)
 
 
 # - Indexing -
@@ -491,6 +514,7 @@ def bottom_k_indices(tensor, k, axis=-1):
 
 
 # - Statistical -
+
 
 def bincount(tensor, weights=None, minlength=0):
     """Count number of occurrences of each value in array of non-negative ints.

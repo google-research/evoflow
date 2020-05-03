@@ -16,8 +16,8 @@ import cupy as cp
 # sometime numpy is faster / cupy don't have the op.
 import numpy  # DON'T IMPORT AS np -- make it hard to distinguish with cupy.
 
-
 # -initialization-
+
 
 def copy(tensor):
     """Copy a tensor
@@ -88,7 +88,7 @@ def normal(shape, mean=0.0, dev=1.0):
 
 
 # - Reduce -
-def prod(tensor, axis=None,  dtype=None, out=None, keepdims=False):
+def prod(tensor, axis=None, dtype=None, out=None, keepdims=False):
     """Returns the product of an array along a given axis.
 
     Args:
@@ -103,8 +103,7 @@ def prod(tensor, axis=None,  dtype=None, out=None, keepdims=False):
     Returns:
         ndarray: The maximum of ``tensor``, along the axis if specified.
     """
-    return cp.prod(tensor, axis=axis, out=out, keepdims=keepdims,
-                   dtype=dtype)
+    return cp.prod(tensor, axis=axis, out=out, keepdims=keepdims, dtype=dtype)
 
 
 def max(tensor, axis=None, out=None, keepdims=False):
@@ -160,7 +159,7 @@ def min(tensor, axis=None, out=None, keepdims=False):
         return cp.amin(tensor, axis=axis, out=out, keepdims=keepdims)
 
 
-def sum(tensor, axis=None,  dtype=None, out=None, keepdims=False):
+def sum(tensor, axis=None, dtype=None, out=None, keepdims=False):
     """Returns the sum of an array along given axes.
 
     Args:
@@ -197,6 +196,7 @@ def mean(tensor, axis=None, dtype=None, out=None, keepdims=False):
 
 
 # - Manipulation -
+
 
 def tensor(a, dtype=None):
     """Converts an object to a tensor.
@@ -427,13 +427,41 @@ def randint(low, high=None, shape=None, dtype='l'):
     return cp.random.randint(low, high=high, size=shape, dtype=dtype)
 
 
-def shuffle(tensor):
-    """Shuffle a tensor
+def shuffle(tensor, axis=0):
+    """Shuffle in place a tensor along a given axis. Other axis remain in
+    place.
 
     Args:
         tensor (ndarray): tensor to shuffle.
+        axis (int, optional): axis to shuffle on. Default to 0.
+
+    Returns:
+        None: in place shuffling
     """
-    cp.random.shuffle(tensor)
+    if not axis:
+        cp.random.shuffle(tensor)
+    else:
+        size = tensor.shape[axis]
+        # cupy don't support new numpy rng system, so have to do it ourselves.
+        cp.take(tensor, cp.random.rand(size).argsort(), axis=axis, out=tensor)
+
+        # alternative version
+        # cp.take(tensor, cp.random.permutation(size), axis=axis, out=tensor)
+
+
+def full_shuffle(tensor):
+    """Shuffle in place a tensor along all of its axis
+
+    Args:
+        tensor (ndarray): tensor to shuffle.
+
+    Returns:
+        None: in place shuffling
+
+    """
+
+    for idx in range(len(tensor.shape)):
+        shuffle(tensor, axis=idx)
 
 
 # - Indexing -
@@ -499,6 +527,7 @@ def bottom_k_indices(tensor, k, axis=-1):
     """
     idxs = cp.argpartition(tensor, k)[:k]
     return idxs[cp.argsort(tensor[idxs])]
+
 
 # - Statistical -
 
