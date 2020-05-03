@@ -22,8 +22,12 @@ class SumGenes(FitnessFunction):
         """Compute the sum of the gene as fitness value.
 
         Args:
-            expected_max_value (int): expected max value if known. Used
-            to normalize the fitness function if specified.
+            expected_max_value (int, optional): expected max value if known.
+            Used to normalize the fitness function if specified.
+            Defaults to None.
+
+        Note:
+            This fitness function is used to solve the MAXONE problem.
 
         """
         super(SumGenes, self).__init__('sum_genes', **kwargs)
