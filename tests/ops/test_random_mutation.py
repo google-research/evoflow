@@ -128,3 +128,45 @@ def test_ND():
         population = RM._call_from_graph(population)
         assert B.is_tensor(population)
         assert population.shape == pop_shape
+
+
+def test_uniform_distribution():
+    """check that every gene of the tensor are going to be flipped equally
+    Note:
+    # ! We need enough iterations and chromosomes to reduce collision
+    # ! and ensure numerical stability
+    """
+    NUM_ITERATIONS = 1000
+    GENOME_SHAPE = (20, 4, 4)
+    population = B.randint(0, 1024, GENOME_SHAPE)
+    population_fraction = 1
+    crossover_probability = (0.5, 0.5)
+
+    # each gene proba of being mutated 0.5*0.5 > 0.25
+    # each chromosome proba of being mutated 1
+    # => gene average hit rate: 1000 / (1/4)  ~250
+    MIN_DIFF_BOUND = 200
+    MAX_DIFF_BOUND = 300
+
+    OP = RandomMutations2D(population_fraction, crossover_probability)
+
+    # diff matrix
+    previous_population = copy(population)
+    population = OP(population)
+    diff = B.clip(abs(population - previous_population), 0, 1)
+    for _ in range(NUM_ITERATIONS - 1):
+        previous_population = copy(population)
+        population = OP(population)
+
+        curr_diff = B.clip(abs(population - previous_population), 0, 1)
+        # acumulating diff matrix
+        diff += curr_diff
+
+    print(curr_diff)
+
+    for c in diff:
+        print(c)
+        print('mean', B.mean(c), 'min', B.min(c), 'max', B.max(c))
+        assert B.min(c) > MIN_DIFF_BOUND
+        assert B.max(c) < MAX_DIFF_BOUND
+        assert MIN_DIFF_BOUND < B.mean(c) < MAX_DIFF_BOUND
