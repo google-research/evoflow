@@ -15,5 +15,13 @@
 from geneflow import io
 
 
-def test_print_debug():
-    io.print_debug('component', 'msg')
+def test_print_debug_multi_msg():
+    io.print_debug('component', 'msg1', 'msg2')
+
+
+def test_casting_msg():
+    io.print_debug('component', [1, 2], 3)
+
+
+def test_print_debug_single_msg():
+    io.print_debug('component', "simple")

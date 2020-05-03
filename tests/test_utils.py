@@ -17,10 +17,7 @@ from geneflow.backend import tensor
 
 
 def test_box_unbox():
-    vals = [
-        'a',
-        [1, 2, 3]
-    ]
+    vals = ['a', [1, 2, 3]]
 
     for val in vals:
         assert unbox(box(val)) == val

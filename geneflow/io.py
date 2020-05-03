@@ -15,11 +15,13 @@
 from termcolor import cprint
 
 
-def print_debug(component, msg):
+def print_debug(component, *msg):
     """Print debug message
 
     Args:
         component (str): Origin component.
-        msg (str): Debug message.
+        msg (*str): Debug message. Can be made of multiple chunk like
+        a normal print.
     """
+    msg = " ".join(str(m) for m in msg)
     cprint('[DEBUG]%s:%s' % (component, msg))
