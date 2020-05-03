@@ -28,8 +28,8 @@ class OP(object):
 
         # naming
         self.op_type = self.__class__.__name__
-        self.idx = kwargs.get('name', self.op_type.lower() + "_" +
-                              self._gen_idx())
+        self.idx = kwargs.get('name',
+                              self.op_type.lower() + "_" + self._gen_idx())
         self.debug = kwargs.get('debug', False)
 
         self.input_ops = []
@@ -126,7 +126,7 @@ class OP(object):
         }
         return config
 
-    def print_debug(self, msg):
+    def print_debug(self, *msg):
         "output debug message"
         if self.debug:
             print_debug(self.idx, msg)

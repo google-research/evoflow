@@ -21,7 +21,7 @@ and Chromosomal mutations. Equivalent to deep-learning layers
 - **evoluationary model**: Directed graph of evolutionary ops used to evolve
 the population. Equivalent to a model architecture in deep-learning settings.
 
-## Deep-learning versus Evoluationary algorithms.
+## Deep-learning versus Evoluationary algorithms
 
 Generally you want to use Deep-learning when the problem is continious/smooth
 and evoluationary algorithms when the problem is discrete. For example voice

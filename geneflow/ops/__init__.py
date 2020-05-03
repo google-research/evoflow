@@ -19,15 +19,21 @@ from ..engine.op import OP  # noqa: F401
 from .core import Dummy  # noqa: F401
 
 # inputs
-from .inputs import Inputs    # noqa: F401
+from .inputs import Inputs  # noqa: F401
 from .inputs import RandomInputs  # noqa: F401
 
 # mutation
-from .mutation import RandomMutations  # noqa: F401
+from .random_mutation import RandomMutations1D  # noqa: F401
+from .random_mutation import RandomMutations2D  # noqa: F401
+from .random_mutation import RandomMutations3D  # noqa: F401
 
 # crossover
 from .uniform_crossover import UniformCrossover1D  # noqa: F401
 from .uniform_crossover import UniformCrossover2D  # noqa: F401
 from .uniform_crossover import UniformCrossover3D  # noqa: F401
-from .crossover import SingleCrossover  # noqa: F401
-from .crossover import DualCrossover  # noqa: F401
+from .single_crossover import SingleCrossover1D  # noqa: F401
+from .single_crossover import SingleCrossover2D  # noqa: F401
+from .single_crossover import SingleCrossover3D  # noqa: F401
+from .dual_crossover import DualCrossover1D  # noqa: F401
+from .dual_crossover import DualCrossover2D  # noqa:F401
+from .dual_crossover import DualCrossover3D  # noqa: F401
