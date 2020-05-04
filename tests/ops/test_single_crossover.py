@@ -59,7 +59,8 @@ def test_1D_shape():
     population_fraction = 0.5
     crossover_size_fraction = 0.2
 
-    res = SingleCrossover1D(population_fraction, crossover_size_fraction,
+    res = SingleCrossover1D(population_fraction,
+                            crossover_size_fraction,
                             debug=1)(chromosomes)
 
     assert chromosomes.shape == GENOME_SHAPE

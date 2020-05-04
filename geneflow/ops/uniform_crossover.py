@@ -24,12 +24,18 @@ class UniformCrossover(OP):
         Args:
             population_fraction (float): How many chromosomes
             should have a cross-over.
+
             crossover_probability (list(float)): What fraction of the
             gene should be affected by crossovers.
+
             debug (bool, optional): print debug information and function
             returns additional data.
+
         Returns:
             tensor: population with a crossover.
+
+        See:
+            https://en.wikipedia.org/wiki/Crossover_(genetic_algorithm)
         """
 
         if not (0 < population_fraction <= 1.0):

@@ -14,18 +14,19 @@
 
 from geneflow import GeneFlow
 import geneflow.backend as B
-from geneflow.ops import RandomInputs, RandomMutations, UniformCrossover1D
+from geneflow.ops import RandomInputs, RandomMutations1D, UniformCrossover1D
 from geneflow.selection import SelectFittest
 from geneflow.fitness import SumGenes
 
 
 def test_helloworld():
+    "Solve the MAXONE problem"
     NUM_EVOLUTIONS = 10
     POPULATION_SIZE = 32
     GENE_SIZE = 8
 
     inputs = RandomInputs((POPULATION_SIZE, GENE_SIZE), max_value=1)
-    x = RandomMutations(max_gene_value=1)(inputs)
+    x = RandomMutations1D(max_gene_value=1)(inputs)
     outputs = UniformCrossover1D()(x)
     gf = GeneFlow(inputs, outputs, debug=0)
     fitness_function = SumGenes(expected_max_value=GENE_SIZE)
@@ -52,5 +53,5 @@ def test_helloworld():
 
     # check population value
     population = results.get_populations()
-    assert(population.shape) == (POPULATION_SIZE, GENE_SIZE)
+    assert (population.shape) == (POPULATION_SIZE, GENE_SIZE)
     assert B.tensor_equal(population[0], B.tensor([1] * GENE_SIZE))

@@ -56,8 +56,8 @@ def test_uniform_2Dcrossover_randomness_shape():
         assert abs(mutated_cells - (mc // mutated_rows)) < 2
 
 
-def test_uniform_2Dcrossover_distribution():
-    """check that every gene of the tensor are going to be flipped
+def test_uniformcrossover2d_distribution():
+    """check that every gene of the tensor are going to be flipped equally
     Note:
     # ! We need enough iterations and chromosomes to reduce collision
     # ! and ensure numerical stability
@@ -71,8 +71,8 @@ def test_uniform_2Dcrossover_distribution():
     # each gene proba of being mutated 0.5*0.5 > 0.25
     # each chromosome proba of being mutated 1
     # => gene average hit rate: 1000 / (1/4)  ~250
-    MIN_DIFF_BOUND = 200
-    MAX_DIFF_BOUND = 300
+    MIN_DIFF_BOUND = 180
+    MAX_DIFF_BOUND = 320
 
     OP = UniformCrossover2D(population_fraction, crossover_probability)
 

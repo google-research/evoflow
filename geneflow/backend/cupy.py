@@ -463,6 +463,15 @@ def full_shuffle(tensor):
     for idx in range(len(tensor.shape)):
         shuffle(tensor, axis=idx)
 
+    # alternative
+    # total_chromosome_size = B.prod(B.tensor(self.x_matrix.shape[1:]))
+    # flatten_shape = (self.x_matrix.shape[0],
+    #                    int(total_chromosome_size))
+    # self.flatten_x_matrix = B.reshape(self.x_matrix, flatten_shape)
+    # B.shuffle(self.flatten_x_matrix)
+    # B.shuffle(self.flatten_x_matrix.T)
+    # self.x_matrix = B.reshape(self.flatten_x_matrix, self.x_matrix.shape)
+
 
 # - Indexing -
 

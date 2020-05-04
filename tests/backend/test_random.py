@@ -51,7 +51,7 @@ def test_full_shuffle(backends):
         ok = False
 
         # give it multiple try as identity is a valid shuffle
-        for _ in range(10):
+        for _ in range(100):
             if (t[0][0] != 1 or t[1][0] != 4) and (t[0][1] != 2
                                                    or t[1][1] != 5):  # noqa
                 ok = True

@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import geneflow.backend as B
 from geneflow.ops import Dummy, Inputs
 
 
 def test_eager():
     "when passing concrete value GF is suppposed to return a concrete value"
-    val = 42
+    val = B.tensor(42)
     assert Dummy(debug=True)(val) == val
 
 
