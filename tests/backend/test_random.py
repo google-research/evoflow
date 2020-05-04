@@ -19,6 +19,11 @@ def arr2d():
     return [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
 
+def arr2dlarge():
+    return [[1, 2, 3, 10, 11, 12], [4, 5, 6, 13, 14, 15],
+            [7, 8, 9, 16, 17, 18]]
+
+
 def test_shuffle_axis0(backends):
     for B in backends:
         t = B.tensor(arr2d())
@@ -51,7 +56,7 @@ def test_full_shuffle(backends):
         ok = False
 
         # give it multiple try as identity is a valid shuffle
-        for _ in range(100):
+        for _ in range(200):
             if (t[0][0] != 1 or t[1][0] != 4) and (t[0][1] != 2
                                                    or t[1][1] != 5):  # noqa
                 ok = True
