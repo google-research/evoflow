@@ -58,6 +58,9 @@ class RandomMutations(OP):
                 raise ValueError(
                     "mutations_probability values must be between ]0. 1]")
 
+        if min_gene_value and max_gene_value and min_gene_value >= max_gene_value:  # noqa
+            raise ValueError("min_gene_value must < than max_gen_value")
+
         # ! don't remove the _num_ qualifier. It might feel it is unecessary
         # ! but we want consistent naming accross ops and crossover ops need it
         self.population_fraction = population_fraction
@@ -116,12 +119,14 @@ class RandomMutations(OP):
             population = population + mask
 
             # normalize
-            if self.max_gene_value:
+            if self.max_gene_value or self.min_gene_value:
+                self.print_debug("min_gen_val", self.min_gene_value)
+                self.print_debug("max_gen_val", self.max_gene_value)
+
                 population = B.clip(population,
                                     min_val=self.min_gene_value,
                                     max_val=self.max_gene_value)
             results.append(population)
-
         return results
 
 
@@ -140,7 +145,7 @@ class RandomMutations1D(RandomMutations):
         super(RandomMutations1D,
               self).__init__(population_fraction,
                              mutations_probability=[mutations_probability],
-                             min_gene_value=min_mutation_value,
+                             min_gene_value=min_gene_value,
                              max_gene_value=max_gene_value,
                              min_mutation_value=min_mutation_value,
                              max_mutation_value=max_mutation_value,

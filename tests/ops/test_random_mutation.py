@@ -19,6 +19,15 @@ from copy import copy
 from termcolor import cprint
 
 
+def test_binary_val_default_params():
+    pop_shape = (6, 4)
+    population = B.randint(0, 2, pop_shape)
+    population = RandomMutations1D(max_gene_value=1, debug=1)(population)
+    print(population)
+    assert B.max(population) == 1
+    assert not B.min(population)
+
+
 def test_mutation2d_eager():
     pop_shape = (2, 4, 4)
     max_gene_value = 10
@@ -136,6 +145,7 @@ def test_uniform_distribution():
     # ! We need enough iterations and chromosomes to reduce collision
     # ! and ensure numerical stability
     """
+
     NUM_ITERATIONS = 1000
     GENOME_SHAPE = (20, 4, 4)
     population = B.randint(0, 1024, GENOME_SHAPE)

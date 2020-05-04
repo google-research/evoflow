@@ -19,11 +19,11 @@ from collections import defaultdict
 from tqdm.auto import tqdm
 
 from geneflow.utils import box
+from geneflow.io import print_debug
 from .results import Results
 
 
 class GeneFlow(object):
-
     def __init__(self, inputs, outputs, debug=False):
 
         if not inputs:
@@ -47,7 +47,7 @@ class GeneFlow(object):
         self.idx2input_idx = defaultdict(set)  # ops used as inputs
         self.idx2ouput_ops = defaultdict(set)  # ops used as outputs
 
-        self.inputs_idx = []    # track which op idx are inputs
+        self.inputs_idx = []  # track which op idx are inputs
         self.outputs_idx = []  # track what op idx are outputs
 
         self.fitness = None
@@ -81,7 +81,7 @@ class GeneFlow(object):
         self.fitness_functions = box(fitness_functions)
         self.compiled = True
 
-        self._results = Results()
+        self._results = Results(debug=self.debug)
 
     def history(self):
         return self._history
@@ -124,9 +124,7 @@ class GeneFlow(object):
 
                 # select population
                 new_population, fitness_scores = self.selection_strategy(
-                                                        fitness_function,
-                                                        current_population,
-                                                        evolved_population)
+                    fitness_function, current_population, evolved_population)
 
                 # update population tensor
                 self.inputs[pop_idx].assign(new_population)
@@ -159,13 +157,13 @@ class GeneFlow(object):
 
         # single batch # FIXME: move to a batch function as we need for
         # evaluate
-        self.print_debug('execution path:%s' % self.execution_path)
+        self.print_debug('execution path:', self.execution_path)
 
         for op_idx in self.execution_path:
             op = self.idx2op[op_idx]
 
-            self.print_debug('|- %s(%s)' % (op.idx,
-                                            self.idx2input_idx[op.idx]))
+            self.print_debug('|- %s(%s)' %
+                             (op.idx, self.idx2input_idx[op.idx]))
 
             # fetching inputs values
             inputs = []
@@ -173,7 +171,7 @@ class GeneFlow(object):
                 inputs.append(self.idx2results[input_idx])
             self.idx2results[op_idx] = op._call_from_graph(inputs)
 
-        self.print_debug('idx2results: %s' % self.idx2results.keys())
+        self.print_debug('idx2results:', self.idx2results.keys())
 
         # collect results
         results = []
@@ -208,13 +206,13 @@ class GeneFlow(object):
             # else:
             #     outputs = '>>'
 
-            rows.append([op_info, op_shape,  inputs])
+            rows.append([op_info, op_shape, inputs])
         print(tabulate(rows, headers=['OP (type)', 'Output Shape', 'Inputs']))
 
-    def print_debug(self, msg):
+    def print_debug(self, *msg):
         "output debug message"
         if self.debug:
-            cprint('[DEBUG]GeneFlow:%s' % (msg), 'cyan')
+            print_debug('GeneFlow', *msg)
 
     def _add_op_to_graph(self, op, output_op=None, debug=0):
         """

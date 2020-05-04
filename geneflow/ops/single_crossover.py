@@ -17,8 +17,7 @@ from geneflow import backend as B
 
 
 class SingleCrossover(OP):
-    def __init__(self, population_fraction, crossover_probability,
-                 **kwargs):
+    def __init__(self, population_fraction, crossover_probability, **kwargs):
         """Perform single crossovers on a given population.
 
         Args:
@@ -62,17 +61,11 @@ class SingleCrossover(OP):
     def compute(self, population):
 
         # mix genomes
-        B.shuffle(population)
         population_copy = B.copy(population)
         B.shuffle(population_copy)
 
-        # save population for debug
-        if self.debug:
-            original_population = B.copy(population)
-
         # how many chromosomes to crossover
-        num_crossovers = int(population.shape[0] *
-                             self.population_fraction)
+        num_crossovers = int(population.shape[0] * self.population_fraction)
 
         if self.debug:
             print('num_crossovers', num_crossovers)
@@ -103,12 +96,6 @@ class SingleCrossover(OP):
         cross_section = population_copy[self.slices]
         population[self.slices] = cross_section
 
-        if self.debug:
-            return {
-                'mutated': population,
-                'original': original_population,
-                'num_crossover_chromosome': num_crossovers,
-            }
         return population
 
 
@@ -156,17 +143,18 @@ class SingleCrossover3D(SingleCrossover):
 
 
 if __name__ == '__main__':
+    from copy import copy
     print(B.backend())
     GENOME_SHAPE = (6, 4, 4)
     population = B.randint(0, 256, GENOME_SHAPE)
     population_fraction = 0.5
     max_crossover_size_fraction = (0.5, 0.5)
     print(population.shape)
-
-    res = SingleCrossover2D(population_fraction,
-                            max_crossover_size_fraction,
-                            debug=True)(population)
+    original_population = copy(population)
+    population = SingleCrossover2D(population_fraction,
+                                   max_crossover_size_fraction,
+                                   debug=True)(population)
 
     # diff matrix
-    diff = B.clip(abs(res['mutated'] - res['original']), 0, 1)
+    diff = B.clip(abs(population - original_population), 0, 1)
     print(diff)

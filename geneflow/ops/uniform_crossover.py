@@ -65,10 +65,6 @@ class UniformCrossover(OP):
         population_copy = B.copy(population)
         B.shuffle(population_copy)
 
-        # save population for debug
-        if self.debug:
-            original_population = B.copy(population)
-
         # how many chromosomes to crossover?
         num_crossovers = int(population.shape[0] * self.population_fraction)
         self.print_debug("population size %s" % population.shape[0])
@@ -115,13 +111,6 @@ class UniformCrossover(OP):
 
         # add the mutations
         population += (population_copy * self.x_matrix)
-
-        if self.debug:
-            return {
-                'mutated': population,
-                'original': original_population,
-                'num_crossover_chromosome': num_crossovers,
-            }
 
         return population
 
@@ -172,21 +161,21 @@ if __name__ == '__main__':
     from copy import copy
     print(B.backend())
     GENOME_SHAPE = (10, 4, 4)
-    chromosomes = B.randint(0, 1024, GENOME_SHAPE)
+    population = B.randint(0, 1024, GENOME_SHAPE)
     population_fraction = 0.5
     crossover_probability = (0.5, 0.5)
 
-    print(chromosomes.shape)
+    print(population.shape)
     # peforming crossover
-    res = UniformCrossover2D(population_fraction,
-                             crossover_probability,
-                             debug=True)(chromosomes)
+    original_population = copy(population)
+    population = UniformCrossover2D(population_fraction,
+                                    crossover_probability)(population)
 
     # diff matrix
-    diff = B.clip(abs(res['mutated'] - res['original']), 0, 1)
+    diff = B.clip(abs(population - original_population), 0, 1)
     print(diff)
     # expected mutated chromosomes
-    expected_mutated = chromosomes.shape[0] * population_fraction
+    expected_mutated = population.shape[0] * population_fraction
     cprint(
         "Expected mutated chromosome:%d (+/- 1 due to collision)" %
         (expected_mutated), 'cyan')
@@ -201,10 +190,10 @@ if __name__ == '__main__':
     cprint(mutated_chromosomes[0], 'cyan')
 
     OP = UniformCrossover2D(population_fraction, crossover_probability)
-    res = OP(chromosomes)
+    res = OP(population)
     for _ in range(100):
         prev = copy(res)
-        res = OP(chromosomes)
+        res = OP(population)
         # acumulating diff matrix
         diff += B.clip(abs(res - prev), 0, 1)
 

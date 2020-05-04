@@ -17,7 +17,6 @@ from geneflow import backend as B
 
 
 class Inputs(OP):
-
     def __init__(self, shape, **kwargs):
         """Use a supplied set genomes
 
@@ -42,8 +41,9 @@ class Inputs(OP):
         """Assign concrete values to the input
         """
         if chromosomes.shape != self.shape:
-            raise ValueError('Incompatible input shape expected: %s - got: %s'
-                             % (self.shape, chromosomes.shape))
+            raise ValueError(
+                'Incompatible input shape expected: %s - got: %s' %
+                (self.shape, chromosomes.shape))
         self.chromosomes = chromosomes
 
     def call(self):
@@ -52,9 +52,12 @@ class Inputs(OP):
 
 
 class RandomInputs(Inputs):
-
-    def __init__(self, shape, min_value=0, max_value=256,
-                 always_regnerate=False, **kwargs):
+    def __init__(self,
+                 shape,
+                 min_value=0,
+                 max_value=256,
+                 always_regnerate=False,
+                 **kwargs):
         """Generate genomes as random integer inputs
 
         Args:
@@ -94,4 +97,6 @@ class RandomInputs(Inputs):
     def _generate_chromosomes(self):
         "Generate a random genepool"
         # FIXME support other type of input (float)
-        return B.randint(self.min_value, self.max_value, shape=self.shape)
+        inputs = B.randint(self.min_value, self.max_value, shape=self.shape)
+        self.print_debug(inputs)
+        return inputs

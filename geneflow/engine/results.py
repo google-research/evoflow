@@ -16,23 +16,24 @@ from time import time
 from collections import defaultdict
 import matplotlib.pyplot as plt
 
-
 from tabulate import tabulate
 
 import geneflow.backend as B
 from geneflow.utils import unbox
+from geneflow.io import print_debug
 
 
 class Results(object):
-
-    def __init__(self):
-        self._metrics_latest = {}  # convinience holder
-        self._metrics_history = defaultdict(list)
+    def __init__(self, debug=False):
 
         self.start_time = time()
 
         self._populations = None
         self._fitness_scores = None
+        self._metrics_latest = {}  # convinience holder
+        self._metrics_history = defaultdict(list)
+
+        self.debug = debug
 
     def get_populations(self):
         return unbox(self._populations)
@@ -46,9 +47,15 @@ class Results(object):
         Note: the whole class assumes populations as a list so don't set
         unboxed results or it will break everything.
         """
+
+        if self.debug:
+            print_debug(populations)
+
         self._populations = populations
 
-    def display_populations(self, top_k=10, max_chromosome_len=20,
+    def display_populations(self,
+                            top_k=10,
+                            max_chromosome_len=20,
                             precision=None):
         """Display the population
 
@@ -88,10 +95,10 @@ class Results(object):
         """Plots the various metrics"""
         metrics = self.get_metrics_history()
         for row_id, name in enumerate(sorted(metrics.keys())):
-                plt.figure(row_id + 1)
-                title = name.replace('_', ' ').capitalize()
-                plt.title(title)
-                plt.plot(metrics[name])
+            plt.figure(row_id + 1)
+            title = name.replace('_', ' ').capitalize()
+            plt.title(title)
+            plt.plot(metrics[name])
 
     def get_metrics_history(self):
         """Get the last evolution metrics values
@@ -119,10 +126,7 @@ class Results(object):
 
         # update history
         for pop_idx, fit_scores in enumerate(fitness_scores):
-            METRICS = [
-                ['mean', B.mean],
-                ['max', B.max]
-            ]
+            METRICS = [['mean', B.mean], ['max', B.max]]
 
             for stem, fn in METRICS:
                 name = "fitness_%s" % stem

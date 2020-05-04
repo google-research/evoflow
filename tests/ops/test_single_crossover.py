@@ -15,6 +15,8 @@
 # import os
 # os.environ['GENEFLOW_BACKEND'] = 'numpy'
 
+from copy import copy
+from termcolor import cprint
 from geneflow import backend as B  # noqa: F402
 from geneflow.ops import SingleCrossover1D, SingleCrossover2D
 from geneflow.ops import SingleCrossover3D
@@ -54,26 +56,32 @@ def test_ND():
 
 
 def test_1D_shape():
-    GENOME_SHAPE = (64, 128)
-    chromosomes = B.randint(0, 1024, GENOME_SHAPE)
+    POPULATION_SHAPE = (64, 16)
+    population = B.randint(0, 1024, POPULATION_SHAPE)
     population_fraction = 0.5
     crossover_size_fraction = 0.2
 
-    res = SingleCrossover1D(population_fraction,
-                            crossover_size_fraction,
-                            debug=1)(chromosomes)
+    original_population = copy(population)
+    population = SingleCrossover1D(population_fraction,
+                                   crossover_size_fraction,
+                                   debug=1)(population)
 
-    assert chromosomes.shape == GENOME_SHAPE
+    cprint(population, 'cyan')
+    cprint(original_population, 'yellow')
+
+    assert population.shape == POPULATION_SHAPE
     # measuring mutation rate
-    diff = B.clip(B.abs(res['original'] - res['mutated']), 0, 1)
-    # cprint(diff, 'cyan')
+    diff = B.clip(abs(population - original_population), 0, 1)
+    print(diff, 'cyan')
 
     # row test
     num_ones_in_row = 0
     for col in diff:
-        num_ones_in_row = max(list(col).count(1), num_ones_in_row)
+        num_ones = list(col).count(1)
+        print(num_ones)
+        num_ones_in_row = max(num_ones, num_ones_in_row)
 
-    max_one_in_row = GENOME_SHAPE[1] * crossover_size_fraction
+    max_one_in_row = POPULATION_SHAPE[1] * crossover_size_fraction
     assert num_ones_in_row <= max_one_in_row
     assert num_ones_in_row
 
@@ -83,5 +91,5 @@ def test_1D_shape():
     for col in diff:
         num_ones_in_col = max(list(col).count(1), num_ones_in_col)
 
-    max_one_in_col = GENOME_SHAPE[0] * population_fraction
+    max_one_in_col = POPULATION_SHAPE[0] * population_fraction
     assert max_one_in_col - 2 <= num_ones_in_col <= max_one_in_col

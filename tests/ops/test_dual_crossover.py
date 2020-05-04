@@ -14,6 +14,7 @@
 
 # import os
 # os.environ['GENEFLOW_BACKEND'] = 'numpy'
+from termcolor import cprint
 from copy import copy
 from geneflow import backend as B
 from geneflow.ops import DualCrossover1D, DualCrossover2D
@@ -54,18 +55,22 @@ def test_ND():
 
 
 def test_crossover1D_output_shape():
-    POPULATION_SHAPE = (64, 128)
+    POPULATION_SHAPE = (8, 6)
     population = B.randint(0, 1024, POPULATION_SHAPE)
     population_fraction = 0.5
     mutations_probability = 0.2
 
-    res = DualCrossover1D(population_fraction,
-                          mutations_probability,
-                          debug=True)(population)
+    original_population = copy(population)
+    population = DualCrossover1D(population_fraction,
+                                 mutations_probability,
+                                 debug=True)(population)
 
+    cprint(population, 'cyan')
+    cprint(original_population, 'yellow')
+
+    assert population.shape == POPULATION_SHAPE
     # measuring mutation rate
-    diff = B.clip(B.abs(res['original'] - res['mutated']), 0, 1)
-    # cprint(diff, 'cyan')
+    diff = B.clip(abs(population - original_population), 0, 1)
 
     # row test
     num_ones_in_row = 0
@@ -84,7 +89,7 @@ def test_dualcrossover2d_distribution():
     # ! and ensure numerical stability
     """
     NUM_ITERATIONS = 1000
-    GENOME_SHAPE = (20, 4, 4)
+    GENOME_SHAPE = (100, 4, 4)
     population = B.randint(0, 1024, GENOME_SHAPE)
     population_fraction = 1
     crossover_probability = (0.5, 0.5)
@@ -95,6 +100,8 @@ def test_dualcrossover2d_distribution():
     previous_population = copy(population)
     population = OP(population)
     diff = B.clip(abs(population - previous_population), 0, 1)
+    print(diff)
+
     for _ in range(NUM_ITERATIONS - 1):
         previous_population = copy(population)
         population = OP(population)
@@ -103,11 +110,11 @@ def test_dualcrossover2d_distribution():
         # acumulating diff matrix
         diff += curr_diff
 
-    print(curr_diff)
+    # print(curr_diff)
 
     for c in diff:
         print(c)
         print('mean', B.mean(c), 'min', B.min(c), 'max', B.max(c))
-        assert B.min(c) > NUM_ITERATIONS * 0.9
-        assert B.max(c) < NUM_ITERATIONS
-        assert NUM_ITERATIONS * 0.9 < B.mean(c) < NUM_ITERATIONS
+        assert B.min(c) > 50
+        assert B.max(c) < NUM_ITERATIONS / 2
+        assert 200 < B.mean(c) < NUM_ITERATIONS / 2

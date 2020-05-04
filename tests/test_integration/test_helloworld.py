@@ -22,8 +22,8 @@ from geneflow.fitness import SumGenes
 def test_helloworld():
     "Solve the MAXONE problem"
     NUM_EVOLUTIONS = 10
-    POPULATION_SIZE = 32
-    GENE_SIZE = 8
+    POPULATION_SIZE = 512
+    GENE_SIZE = 1024
 
     inputs = RandomInputs((POPULATION_SIZE, GENE_SIZE), max_value=1)
     x = RandomMutations1D(max_gene_value=1)(inputs)
@@ -50,6 +50,7 @@ def test_helloworld():
     # assert the engine solved the (Trivial) problem
     assert max(metrics['fitness_max']) == 1
     assert metrics['fitness_max'][9] == 1
+    assert min(metrics['fitness_max']) < 1  # max sure we did improve
 
     # check population value
     population = results.get_populations()

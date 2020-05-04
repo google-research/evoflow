@@ -18,8 +18,7 @@ from geneflow import backend as B
 
 
 class DualCrossover(OP):
-    def __init__(self, population_fraction, crossover_probability,
-                 **kwargs):
+    def __init__(self, population_fraction, crossover_probability, **kwargs):
         """Perform Dual crossovers on a given population.
 
         Args:
@@ -63,13 +62,8 @@ class DualCrossover(OP):
     def compute(self, population):
 
         # mix genomes
-        B.shuffle(population)
         population_copy = B.copy(population)
         B.shuffle(population_copy)
-
-        # save population for debug
-        if self.debug:
-            original_population = B.copy(population)
 
         # how many chromosomes to crossover
         num_crossover_chromosomes = int(population.shape[0] *
@@ -88,7 +82,8 @@ class DualCrossover(OP):
                 num_genes = int(population.shape[idx + 1] * frac)
                 mutations_shape.append(num_genes)
             self.mutations_shape = mutations_shape
-            self.print_debug("mutation_shape: %s" % self.mutations_shape)
+            self.print_debug("population_shape:", population.shape)
+            self.print_debug("mutation_shape:", self.mutations_shape)
 
         else:
             self.print_debug("Using cached fancy indexing")
@@ -99,11 +94,8 @@ class DualCrossover(OP):
         for idx, crossover_size in enumerate(self.mutations_shape[1:]):
             # ! making indexing explicit as its a huge pitfall
             mutation_dim = idx + 1
-            max_start = population.shape[mutation_dim] - crossover_size
-
-            # Using python random as we only need a single integer
-            start = random.randint(0, max_start)
-
+            max_start = population.shape[mutation_dim] - crossover_size + 1
+            start = B.randint(0, max_start, 1)[0]
             slices.append(slice(start, crossover_size + start))
 
         slices = tuple(slices)
@@ -113,12 +105,6 @@ class DualCrossover(OP):
         cross_section = population_copy[slices]
         population[slices] = cross_section
 
-        if self.debug:
-            return {
-                'mutated': population,
-                'original': original_population,
-                'num_crossover_chromosome': num_crossover_chromosomes,
-            }
         return population
 
 
@@ -166,17 +152,18 @@ class DualCrossover3D(DualCrossover):
 
 
 if __name__ == '__main__':
+    from copy import copy
     print(B.backend())
     GENOME_SHAPE = (6, 4, 4)
-    chromosomes = B.randint(0, 256, GENOME_SHAPE)
+    population = B.randint(0, 256, GENOME_SHAPE)
     population_fraction = 0.5
     max_crossover_size_fraction = (0.5, 0.5)
-    print(chromosomes.shape)
-
-    res = DualCrossover2D(population_fraction,
-                          max_crossover_size_fraction,
-                          debug=True)(chromosomes)
+    print(population.shape)
+    original_population = copy(population)
+    population = DualCrossover2D(population_fraction,
+                                 max_crossover_size_fraction,
+                                 debug=True)(population)
 
     # diff matrix
-    diff = B.clip(abs(res['mutated'] - res['original']), 0, 1)
+    diff = B.clip(abs(population - original_population), 0, 1)
     print(diff)
