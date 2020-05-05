@@ -1,17 +1,20 @@
 # GeneFlow - Evolutionary algorithms for humans
+![Build Status](https://github.com/google-research/geneflow/workflows/Python%20package/badge.svg)
 
 ## Terminology
 
-- **Gene**: atomic unit.
+- **Gene**: atomic unit. Equivalent to a neuron in deep-learning.
 - **Chromosome**: ordered list of gene(s).
-- **Genotype**: collection of chromosome(s).
+- **Genotype**: collection of chromosome(s). Used when the problem requires to
+maximizes multiples fitness function at once.
 - **Population of x**: collection of chromosomes or genotypes.
-- **Generation**: One round of evolution. Equivalent to an epoch for DL.
-- **Fitness function**: Function that evaluate how good is a given
-chromosome. Equivalent to the loss function in deep learning except it doesn't
-need to be differentiable.
+  That is what makes a Tensor.
+- **Generation**: One round of evolution. Equivalent to an epoch in deep-learning.
+- **Fitness function**: Function that evaluate how good/fit a given chromosome is.
+  this is equivalent to the loss function in deep learning except it doesn't
+need to be differentiable and aim to be maximized.
 
-### GeneFlow Terminolgy
+### GeneFlow Terminology
 
 - **evoluationary op**: Operation performed on a population of chromosome to
 make them evolve. Common ops includes various type of Chromosomal crossovers

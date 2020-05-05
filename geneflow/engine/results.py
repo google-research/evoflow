@@ -84,12 +84,19 @@ class Results(object):
                     else:
                         genes.append(str(int(gene)))
 
+                if len(genes) != len(chromosome):
+                    genes.append(' ...')
+
                 genes = " ".join(genes)
                 row = [self._fitness_scores[pop_idx][cidx], genes]
                 if cidx == top_k:
                     break
                 rows.append(row)
-            print(tabulate(rows, headers=['fit score', 'genes']))
+            print(
+                tabulate(
+                    rows,
+                    headers=['fit score',
+                             'genes [:%d]' % max_chromosome_len]))
 
     def plot_metrics(self):
         """Plots the various metrics"""
