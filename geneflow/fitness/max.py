@@ -30,7 +30,10 @@ class Max(FitnessFunction):
 
         """
         super(Max, self).__init__('sum_genes', **kwargs)
-        self.expected_max_value = B.tensor(expected_max_value)
+        if expected_max_value:
+            self.expected_max_value = B.tensor(expected_max_value)
+        else:
+            self.expected_max_value = None
 
     def call(self, population):
         if self.expected_max_value:
