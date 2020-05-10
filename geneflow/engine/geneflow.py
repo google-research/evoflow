@@ -54,12 +54,13 @@ class GeneFlow(object):
         self.compiled = False
         self._results = None
 
-        # storing inputs tensors - we assign them when starting evolve()
+        # storing inputs tensors
         self.inputs = box(inputs)
+        for ipt in self.inputs:
+            self.inputs_idx.append(ipt.idx)
 
         # output
         self.outputs = box(outputs)
-
         for output in self.outputs:
             self.outputs_idx.append(output.idx)
 
@@ -86,30 +87,25 @@ class GeneFlow(object):
     def history(self):
         return self._history
 
-    def evolve(self, populations=None, num_evolutions=1):
+    def evolve(self, populations, num_evolutions=1):
 
         if not self.compiled:
-            cprint("please compile model before running evolve it", 'red')
+            raise ValueError("compile() must be run before using the graph")
             return
+
+        populations = box(populations)
+        if not len(populations) == len(self.inputs):
+            raise ValueError('The numbers of population must be equal\
+                 to number of inputs')
 
         # assign initial value to inputs
         current_populations = []
         for pop_idx, ipt in enumerate(self.inputs):
-            # some inputs are provided
-            if populations:
-                if populations[pop_idx]:
-                    # initial value provided
-                    self.inputs[pop_idx].assign(populations[pop_idx])
-                    current_populations.append(populations[pop_idx])
-                else:
-                    # Random inputs
-                    current_populations.append(self.inputs.call())
-            else:
-                # Random inputs
-                current_populations.append(self.inputs[pop_idx].call())
-
+            self.inputs[pop_idx].assign(populations[pop_idx])
+            current_populations.append(populations[pop_idx])
         num_populations = len(current_populations)
 
+        # main loop
         pb = tqdm(total=num_evolutions)
         for evolution_idx in range(num_evolutions):
             evolved_populations = self.perform_evolution()

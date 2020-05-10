@@ -12,21 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import geneflow.backend as B
-from geneflow.ops import Dummy, Input
+from geneflow.ops import Input
+from geneflow import backend as B
 
 
-def test_eager():
-    "when passing concrete value GF is suppposed to return a concrete value"
-    val = B.tensor(42)
-    assert Dummy(debug=True)(val) == val
+def test_1d():
+    shape = (128, 64)
+    population = B.randint(1, 10, shape=shape)
+    inputs = Input(shape)
+    inputs.assign(population)
+    assert inputs.call(population).all() == population.all()
 
 
-def test_graph():
-    "When passing OPs GF is supposed to return a graph"
-    i = Input((42, 1))
-    d1 = Dummy()(i)
-    d2 = Dummy()(i)
-    r = Dummy()([d1, d2])
-    assert issubclass(type(r), Dummy)
-    assert r.call(42) == 42  # explicitly execute the graph op
+def test_2d():
+    shape = (128, 64, 64)
+    population = B.randint(1, 10, shape=shape)
+    inputs = Input(shape)
+    inputs.assign(population)
+    assert inputs.call(population).all() == population.all()

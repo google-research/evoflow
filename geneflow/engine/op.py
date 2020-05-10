@@ -28,8 +28,7 @@ class OP(object):
 
         # naming
         self.op_type = self.__class__.__name__
-        self.idx = kwargs.get('name',
-                              self.op_type.lower() + "_" + self._gen_idx())
+        self.idx = kwargs.get('name', self._gen_name())
         self.debug = kwargs.get('debug', False)
 
         self.input_ops = []
@@ -44,6 +43,9 @@ class OP(object):
             **kwargs: Additional keyword arguments to be passed to `call()`.
         """
         return chromosomes
+
+    def _gen_name(self):
+        return self.op_type.lower() + "_" + self._gen_idx()
 
     def _call_from_graph(self, populations):
         "Function called during graph executions"

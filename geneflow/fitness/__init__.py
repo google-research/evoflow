@@ -13,5 +13,5 @@
 # limitations under the License.
 
 from ..engine.fitness_function import FitnessFunction  # noqa: F401
-from .cosine_similarity import CosineSimilarity  # noqa: F401
-from .max import Max  # noqa: F401
+from .cosine_similarity import InvertedCosineSimilarity  # noqa: F401
+from .sum import Sum  # noqa: F401

@@ -19,8 +19,7 @@ from ..engine.op import OP  # noqa: F401
 from .core import Dummy  # noqa: F401
 
 # inputs
-from .inputs import RandomInputs  # noqa: F401
-from .inputs import DirectInputs  # noqa: F401
+from ..engine.input import Input  # noqa: F401
 
 # mutation
 from .random_mutation import RandomMutations1D  # noqa: F401

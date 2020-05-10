@@ -14,7 +14,7 @@
 
 import geneflow.backend as B
 from geneflow.selection import SelectFittest
-from geneflow.fitness import CosineSimilarity
+from geneflow.fitness import InvertedCosineSimilarity
 
 
 def test_fittest():
@@ -23,7 +23,7 @@ def test_fittest():
     d = B.tensor([2, 1, 1, 0, 1, 1, 1, 1])
     pop = B.tensor([ref, d, ref, d, ref, d])
 
-    fitness_function = CosineSimilarity(ref)
+    fitness_function = InvertedCosineSimilarity(ref)
     selector = SelectFittest()
     selected_pop, fitness_scores = selector(fitness_function, pop, pop)
     print(selected_pop)
@@ -34,13 +34,20 @@ def test_fittest():
 
 def test_fittest_2d():
 
-    SHAPE = (64, 32, 32)
-    ref_pop = B.randint(0, 2, SHAPE)
-    other_pop = B.randint(0, 2, SHAPE)
+    INSERTION_POINTS = [0, 10, 20]  # where we copy the ref chromosome
 
-    fitness_function = CosineSimilarity(ref_pop)
+    ref_chromosome = B.randint(0, 2, (32, 32))
+    pop1 = B.randint(0, 2, (64, 32, 32))
+    pop2 = B.randint(0, 2, (64, 32, 32))
+    for idx in INSERTION_POINTS:
+        pop1[idx] = ref_chromosome
+
+    fitness_function = InvertedCosineSimilarity(ref_chromosome)
     selector = SelectFittest()
-    selected_pop, fitness_scores = selector(fitness_function, ref_pop,
-                                            other_pop)
+    selected_pop, fitness_scores = selector(fitness_function, pop1, pop2)
     print(selected_pop)
-    assert selected_pop.shape == ref_pop.shape
+    assert selected_pop.shape == pop1.shape
+    # check the exact chromosome is the three top choice
+    assert B.tensor_equal(selected_pop[0], ref_chromosome)
+    assert B.tensor_equal(selected_pop[1], ref_chromosome)
+    assert B.tensor_equal(selected_pop[2], ref_chromosome)

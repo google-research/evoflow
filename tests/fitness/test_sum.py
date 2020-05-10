@@ -12,21 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from geneflow.fitness import Sum
 import geneflow.backend as B
-from geneflow.ops import Dummy, Input
 
 
-def test_eager():
-    "when passing concrete value GF is suppposed to return a concrete value"
-    val = B.tensor(42)
-    assert Dummy(debug=True)(val) == val
+def test_sum2d():
+    t = B.randint(0, 10, (10, 10, 10))
+    v = Sum().call(t)
+
+    result = []
+    for r in t:
+        result.append(B.sum(r, axis=-1))
+    result = B.tensor(result)
+
+    assert v.shape == (10, )
+    for idx, a in enumerate(v):
+        assert v[idx].all() == result[idx].all()
 
 
-def test_graph():
-    "When passing OPs GF is supposed to return a graph"
-    i = Input((42, 1))
-    d1 = Dummy()(i)
-    d2 = Dummy()(i)
-    r = Dummy()([d1, d2])
-    assert issubclass(type(r), Dummy)
-    assert r.call(42) == 42  # explicitly execute the graph op
+def test_max_gene_val_2d():
+    MAX_VAL = 10
+    t = B.randint(0, MAX_VAL + 1, (10, 10, 10))
+    max_sum_value = MAX_VAL * 10 * 10
+    v = Sum(max_sum_value=max_sum_value).call(t)
+    assert v.shape == (10, )
+    for t in v:
+        assert t < 1

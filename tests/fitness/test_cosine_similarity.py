@@ -49,7 +49,7 @@ def test_cosine_2d(backends):
 
     for idx, dst in enumerate(distances):
         if idx in INSERTION_POINTS:
-            assert dst == 1
+            assert int(dst) == 1
         else:
             assert dst < 1
             assert dst > 0

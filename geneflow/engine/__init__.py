@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .inputs import Inputs  # noqa: F401
 from .op import OP  # noqa: F401
 from .selection_strategy import SelectionStrategy  # noqa: F401
 from .fitness_function import FitnessFunction  # noqa: F401

@@ -16,27 +16,29 @@ import geneflow.backend as B
 from geneflow.engine import FitnessFunction
 
 
-class Max(FitnessFunction):
-    def __init__(self, expected_max_value=None, **kwargs):
-        """Compute the sum of the gene as fitness value.
+class Sum(FitnessFunction):
+    def __init__(self, max_sum_value=None, **kwargs):
+        """Compute the sum of the chromosomes as fitness values.
 
         Args:
-            expected_max_value (int, optional): expected max value if known.
-            Used to normalize the fitness function if specified.
-            Defaults to None.
+            expected_max_sum_value (int, optional): What is the maximum value
+            the sum per chromosome will reach. Used to normalize the fitness
+            function between 0 and 1 if specified. Defaults to None.
 
         Note:
             This fitness function is used to solve the MAXONE problem.
 
         """
-        super(Max, self).__init__('sum_genes', **kwargs)
-        if expected_max_value:
-            self.expected_max_value = B.tensor(expected_max_value)
+        super(Sum, self).__init__('sum_genes', **kwargs)
+        if max_sum_value:
+            self.max_sum_value = B.tensor(max_sum_value)
         else:
-            self.expected_max_value = None
+            self.max_sum_value = None
 
     def call(self, population):
-        if self.expected_max_value:
-            return B.sum(population, axis=-1) / self.expected_max_value
+        flat_pop = self._flatten_population(population)
+        scores = B.sum(flat_pop, axis=-1)
+        if self.max_sum_value:
+            return scores / self.max_sum_value
         else:
-            return B.sum(population, axis=-1)
+            return scores
