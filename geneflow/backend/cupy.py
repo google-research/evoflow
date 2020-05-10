@@ -249,6 +249,20 @@ def flatten(tensor):
     return tensor.flatten()
 
 
+def as_numpy_array(tensor):
+    """Convert tensor to a numpy array.
+
+    Useful when interfacing with other librairies to have a unified input
+    to them.
+
+    Args:
+        tensor (ndarray): tensor to convert
+    Returns:
+        numpy.ndarray: Tensor as numpy array
+    """
+    return cp.asnumpy(tensor)
+
+
 def reshape(tensor, shape):
     "reshape tensor"
     return cp.reshape(tensor, shape)

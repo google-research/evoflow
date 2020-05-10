@@ -35,6 +35,7 @@ from .load_backend import concatenate  # noqa: F401
 
 # - Utils -
 from .load_backend import flatten  # noqa: F401
+from .load_backend import as_numpy_array  # noqa: F401
 from .load_backend import reshape  # noqa: F401
 from .load_backend import is_tensor  # noqa: F401
 from .load_backend import tensor_equal  # noqa: F401

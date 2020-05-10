@@ -48,5 +48,9 @@ class Input(OP):
         self.chromosomes = chromosomes
 
     def call(self, unused):
-        "Return input values"
+        "make it compatible with other ops"
+        return self.chromosomes
+
+    def get(self):
+        "shorthand version which is used inside our main loop"
         return self.chromosomes

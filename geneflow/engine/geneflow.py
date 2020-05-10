@@ -102,7 +102,8 @@ class GeneFlow(object):
         current_populations = []
         for pop_idx, ipt in enumerate(self.inputs):
             self.inputs[pop_idx].assign(populations[pop_idx])
-            current_populations.append(populations[pop_idx])
+            pop = self.inputs[pop_idx].get()
+            current_populations.append(pop)
         num_populations = len(current_populations)
 
         # main loop
