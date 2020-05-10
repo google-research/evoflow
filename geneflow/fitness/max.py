@@ -16,8 +16,7 @@ import geneflow.backend as B
 from geneflow.engine import FitnessFunction
 
 
-class SumGenes(FitnessFunction):
-
+class Max(FitnessFunction):
     def __init__(self, expected_max_value=None, **kwargs):
         """Compute the sum of the gene as fitness value.
 
@@ -30,7 +29,7 @@ class SumGenes(FitnessFunction):
             This fitness function is used to solve the MAXONE problem.
 
         """
-        super(SumGenes, self).__init__('sum_genes', **kwargs)
+        super(Max, self).__init__('sum_genes', **kwargs)
         self.expected_max_value = B.tensor(expected_max_value)
 
     def call(self, population):

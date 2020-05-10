@@ -14,4 +14,4 @@
 
 from ..engine.fitness_function import FitnessFunction  # noqa: F401
 from .cosine_similarity import CosineSimilarity  # noqa: F401
-from .sum_genes import SumGenes  # noqa: F401
+from .max import Max  # noqa: F401
