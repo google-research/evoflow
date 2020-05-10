@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from .op import OP
+import geneflow.backend as B
 
 
 class Input(OP):
@@ -38,6 +39,8 @@ class Input(OP):
     def assign(self, chromosomes):
         """Assign concrete values to the input
         """
+        chromosomes = B.tensor(chromosomes)
+
         if chromosomes.shape != self.shape:
             raise ValueError(
                 'Incompatible input shape expected: %s - got: %s' %

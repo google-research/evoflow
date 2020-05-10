@@ -30,3 +30,12 @@ def test_2d():
     inputs = Input(shape)
     inputs.assign(population)
     assert inputs.call(population).all() == population.all()
+
+
+def test_non_tensor_input():
+    shape = (2, 4)
+    population = [[1, 2, 3, 4], [1, 2, 3, 4]]
+    inputs = Input(shape)
+    inputs.assign(population)
+    res = inputs.call("")
+    assert B.is_tensor(res)
