@@ -14,6 +14,7 @@
 
 import abc
 from geneflow.io import print_debug
+import geneflow.backend as B
 
 
 class FitnessFunction(object):
@@ -21,7 +22,6 @@ class FitnessFunction(object):
     To be implemented by subclasses:
     * `call()`: Contains the logic for fitness calculation using `genes.
     """
-
     def __init__(self, name, **kwargs):
         self.name = name
         self.debug = kwargs.get('debug', False)
@@ -37,6 +37,16 @@ class FitnessFunction(object):
             population: Tensor containing the population to assess
         """
         NotImplementedError('Must be implemented in subclasses.')
+
+    def _flatten_population(self, population):
+        """Convert the population to a 1D array as many ops (e.g norm) don't
+        work on Ndimension
+        """
+        if len(population.shape) < 3:
+            return population
+        num_chromosomes = population.shape[0]
+        flattened_size = int(B.prod(B.tensor(population.shape[1:])))
+        return B.reshape(population, (num_chromosomes, flattened_size))
 
     def print_debug(self, msg):
         "output debug message"

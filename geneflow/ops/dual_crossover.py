@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import random
 from geneflow.engine import OP
 from geneflow import backend as B
 

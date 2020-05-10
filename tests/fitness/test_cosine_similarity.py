@@ -12,55 +12,44 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from geneflow.fitness import CosineSimilarity
+from geneflow.fitness import InvertedCosineSimilarity
 import geneflow.backend as B
 
 
-def test_python_input(backends):
-    reference = [2, 0, 1, 1, 0, 2, 1, 1]
-
-    r = B.tensor(reference)
-    cs = CosineSimilarity(reference)  # python input
-    assert int(cs(r)) == 1
-
-
-def test_cosine_similarity_single(backends):
-    reference = [2, 0, 1, 1, 0, 2, 1, 1]
-    different = [2, 1, 1, 0, 1, 1, 1, 1]
-    expected_distance_diff = round(0.8215838362577491, 3)
-
-    r = B.tensor(reference)
-    d = B.tensor(different)
-    print('r', type(r))
-    print('d', type(d))
-    cs = CosineSimilarity(r)
-
-    # similar vector have a distance of 1
-    distance = cs(r)
-    print('cs', type(cs))
-    print('distance', type(distance))
-
-    assert int(distance) == 1
-
-    # different vectors
-    distance = cs(d)
-    assert round(float(distance), 3) == expected_distance_diff
-
-
-def test_cosine_similarity_population(backends):
+def test_cosine_similarity_1dpopulation(backends):
     "test the function works on a population and broadcast correctly"
 
-    reference = [2, 0, 1, 1, 0, 2, 1, 1]
-    different = [2, 1, 1, 0, 1, 1, 1, 1]
-    expected_distance_diff = round(0.8215838362577491, 3)
+    reference = [1, 0, 1, 1, 0, 1, 1, 1]
+    different = [1, 1, 1, 0, 1, 1, 1, 1]
+
     r = B.tensor(reference)
     d = B.tensor(different)
     population = B.tensor([r, d, r])
-    cs = CosineSimilarity(r)
+    cs = InvertedCosineSimilarity(r)
 
     # similar vector have a distance of 1
     distances = cs(population)
-
+    print("distances", distances)
     assert int(distances[0]) == 1
-    assert round(float(distances[1]), 3) == expected_distance_diff
+    assert distances[1] < 1
     assert int(distances[2]) == 1
+
+
+def test_cosine_2d(backends):
+    INSERTION_POINTS = [0, 10, 20]  # where we copy the ref chromosome
+
+    ref_chromosome = B.randint(0, 2, (32, 32))
+    ref_pop = B.randint(0, 2, (64, 32, 32))
+
+    for idx in INSERTION_POINTS:
+        ref_pop[idx] = ref_chromosome
+
+    cs = InvertedCosineSimilarity(ref_chromosome)
+    distances = cs(ref_pop)
+
+    for idx, dst in enumerate(distances):
+        if idx in INSERTION_POINTS:
+            assert dst == 1
+        else:
+            assert dst < 1
+            assert dst > 0

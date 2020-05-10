@@ -238,6 +238,17 @@ def concatenate(tup, axis=0):
 
 
 # - Utils -
+def flatten(tensor):
+    """Returns a copy of the tensor flatten into one dimension.
+
+    Args:
+        tensor (ndarray): tensor to flatten
+    Returns:
+        ndarray: flattened tensor
+    """
+    return tensor.flatten()
+
+
 def reshape(tensor, shape):
     "reshape tensor"
     return cp.reshape(tensor, shape)

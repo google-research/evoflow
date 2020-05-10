@@ -16,27 +16,40 @@ import geneflow.backend as B
 from geneflow.engine import FitnessFunction
 
 
-class CosineSimilarity(FitnessFunction):
-
+class InvertedCosineSimilarity(FitnessFunction):
     def __init__(self, reference_chromosome, **kwargs):
-        """Compute how similar a population is to a reference chromosome.
+        """Inverted Cosine similarity function that returns 1 when chromosomes
+        are similar to the reference chromose and [0, 1[ when different
+
+        For reference implementation see
+        https://github.com/scipy/scipy/blob/v0.14.0/scipy/spatial/distance.py#L267  # noqa
 
         Args:
-            reference_chromosome (tensor): reference_chromosome.
-
-        # FIXME: normalize value betwen 0/1 by using the reference chromosome
+            reference_chromosome (tensor1D): reference_chromosome.
         """
-        super(CosineSimilarity, self).__init__('cosine_similarity', **kwargs)
+        super(InvertedCosineSimilarity, self).__init__('invet_cosine_sim',
+                                                       **kwargs)
 
-        self.reference_chromosome = B.tensor(reference_chromosome)
+        # cache ref chromosome flattend
+        self.ref_chromosome = B.flatten(B.tensor(reference_chromosome))
 
-        # caching the norm computation
-        self.reference_chromosome_norm = B.norm(self.reference_chromosome)
+        # caching ref pop norm
+        self.ref_norm = B.norm(self.ref_chromosome)
 
     def call(self, population):
-        numerator = B.dot(population, self.reference_chromosome)
-        # ! B.norm is not broadcasted we need our own version
-        population_norm = B.sum(B.abs(population) ** 2, axis=-1) ** 0.5
+        # cosine only works on 1D array we need to flatten
+        flat_pop = self._flatten_population(population)
 
-        denominator = population_norm * self.reference_chromosome_norm
-        return numerator / denominator
+        print('flat_pop', flat_pop.shape)
+        print('ref_chromosome', self.ref_chromosome.shape)
+        # numerator
+        numerator = B.dot(flat_pop, self.ref_chromosome)
+
+        # denominator (norm(u) *  norm(v))
+        # ! B.norm is not broadcasted we need our own version
+        population_norm = B.sum(B.abs(flat_pop)**2, axis=-1)**0.5
+        denominator = population_norm * self.ref_norm
+
+        print(numerator)
+        print(denominator)
+        return (numerator / denominator)

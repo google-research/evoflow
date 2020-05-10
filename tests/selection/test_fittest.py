@@ -19,14 +19,28 @@ from geneflow.fitness import CosineSimilarity
 
 def test_fittest():
 
-    r = B.tensor([2, 0, 1, 1, 0, 2, 1, 1])
+    ref = B.tensor([2, 0, 1, 1, 0, 2, 1, 1])
     d = B.tensor([2, 1, 1, 0, 1, 1, 1, 1])
-    pop = B.tensor([r, d, r, d, r, d])
+    pop = B.tensor([ref, d, ref, d, ref, d])
 
-    fitness_function = CosineSimilarity(r)
+    fitness_function = CosineSimilarity(ref)
     selector = SelectFittest()
     selected_pop, fitness_scores = selector(fitness_function, pop, pop)
     print(selected_pop)
     assert selected_pop.shape == pop.shape
     for chromosome in selected_pop:
-        assert B.tensor_equal(chromosome, r)
+        assert B.tensor_equal(chromosome, ref)
+
+
+def test_fittest_2d():
+
+    SHAPE = (64, 32, 32)
+    ref_pop = B.randint(0, 2, SHAPE)
+    other_pop = B.randint(0, 2, SHAPE)
+
+    fitness_function = CosineSimilarity(ref_pop)
+    selector = SelectFittest()
+    selected_pop, fitness_scores = selector(fitness_function, ref_pop,
+                                            other_pop)
+    print(selected_pop)
+    assert selected_pop.shape == ref_pop.shape
