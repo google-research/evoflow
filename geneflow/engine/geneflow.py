@@ -120,8 +120,11 @@ class GeneFlow(object):
                 fitness_function = self.fitness_functions[pop_idx]
 
                 # select population
-                new_population, fitness_scores = self.selection_strategy(
+                new_population, fitness_scores, metrics = self.selection_strategy(  # noqa
                     fitness_function, current_population, evolved_population)
+
+                # update metrics
+                self._results.record_metrics(metrics)
 
                 # update population tensor
                 self.inputs[pop_idx].assign(new_population)
@@ -133,7 +136,7 @@ class GeneFlow(object):
 
             self._results.record_fitness(fitness_scores_list)
 
-            pb.set_postfix(self._results.get_latest_metrics())
+            pb.set_postfix(self._results.get_latest_metrics(flatten=True))
             pb.update()
 
         pb.close()

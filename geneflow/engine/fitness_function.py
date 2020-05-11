@@ -15,6 +15,7 @@
 import abc
 from geneflow.io import print_debug
 import geneflow.backend as B
+from collections import defaultdict
 
 
 class FitnessFunction(object):
@@ -25,6 +26,7 @@ class FitnessFunction(object):
     def __init__(self, name, **kwargs):
         self.name = name
         self.debug = kwargs.get('debug', False)
+        self._metrics = defaultdict(dict)
 
     def __call__(self, population):
         return self.call(population)
@@ -47,6 +49,22 @@ class FitnessFunction(object):
         num_chromosomes = population.shape[0]
         flattened_size = int(B.prod(B.tensor(population.shape[1:])))
         return B.reshape(population, (num_chromosomes, flattened_size))
+
+    def record_metric(self, name, value, group='default'):
+        """Record metrics
+
+        Args:
+            name (str): name of the metrics.
+            value (float): value to be recorded.
+            group (str): group the metric belongs to. Used to group metrics
+            together at display time.
+        """
+        self._metrics[group][name] = float(value)
+
+    def get_metrics(self):
+        """Return the lastest value of the recorded metrics
+        """
+        return self._metrics
 
     def print_debug(self, msg):
         "output debug message"

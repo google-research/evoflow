@@ -14,8 +14,7 @@
 
 from time import time
 from collections import defaultdict
-import matplotlib.pyplot as plt
-
+import plotly.graph_objects as go
 from tabulate import tabulate
 
 import geneflow.backend as B
@@ -30,9 +29,8 @@ class Results(object):
 
         self._populations = None
         self._fitness_scores = None
-        self._metrics_latest = {}  # convinience holder
-        self._metrics_history = defaultdict(list)
-
+        self._metrics_latest = defaultdict(dict)  # convinience holder
+        self._metrics_history = defaultdict(lambda: defaultdict(list))
         self.debug = debug
 
     def get_populations(self):
@@ -101,11 +99,16 @@ class Results(object):
     def plot_metrics(self):
         """Plots the various metrics"""
         metrics = self.get_metrics_history()
-        for row_id, name in enumerate(sorted(metrics.keys())):
-            plt.figure(row_id + 1)
-            title = name.replace('_', ' ').capitalize()
-            plt.title(title)
-            plt.plot(metrics[name])
+        for group_name, group_data in metrics.items():
+            fig = go.Figure()
+            for name, values in group_data.items():
+                fig.add_trace(go.Scatter(y=values, name=name, mode='lines'))
+
+            fig.update_layout(
+                title=group_name,
+                xaxis_title='Generation',
+            )
+            fig.show()
 
     def get_metrics_history(self):
         """Get the last evolution metrics values
@@ -115,13 +118,38 @@ class Results(object):
         """
         return self._metrics_history
 
-    def get_latest_metrics(self):
+    def get_latest_metrics(self, flatten=False):
         """Get the last evolution metrics values
+
+        Args:
+            flatten (bool, optional): Return metrics as a flat dictionary
+            instead of a nested one
 
         Returns:
             dict: name:value as float.
         """
-        return self._metrics_latest
+
+        if flatten:
+            metrics = {}
+            for group_name, group_data in self._metrics_latest.items():
+                for metric, value in group_data.items():
+                    k = "%s_%s" % (group_name, metric)
+                    metrics[k] = value
+            return metrics
+        else:
+            return self._metrics_latest
+
+    def record_metrics(self, metrics):
+        """Record metrics and track their history
+
+        Args:
+            metrics (dict(dict)): group of metrics to track. Of the form:
+            [group][metric] = float(value)
+        """
+        for group, data in metrics.items():
+            for metric, value in data.items():
+                self._metrics_history[group][metric].append(value)
+                self._metrics_latest[group][metric] = value
 
     def record_fitness(self, fitness_scores):
         """Compute and record fitness related metrics
@@ -133,10 +161,9 @@ class Results(object):
 
         # update history
         for pop_idx, fit_scores in enumerate(fitness_scores):
-            METRICS = [['mean', B.mean], ['max', B.max]]
+            METRICS = [['mean', B.mean], ['max', B.max], ['min', B.min]]
 
-            for stem, fn in METRICS:
-                name = "fitness_%s" % stem
+            for name, fn in METRICS:
 
                 # only suffix is more than one population
                 if len(fitness_scores) > 1:
@@ -145,5 +172,5 @@ class Results(object):
                 # compute result
                 value = float(fn(fit_scores))
 
-                self._metrics_history[name].append(value)
-                self._metrics_latest[name] = value
+                self._metrics_history['Fitness function'][name].append(value)
+                self._metrics_latest['Fitness function'][name] = value

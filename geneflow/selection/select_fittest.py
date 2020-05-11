@@ -37,9 +37,16 @@ class SelectFittest(SelectionStrategy):
             evolution
         """
         population_size = current_population.shape[0]
-        merged_population = B.concatenate([current_population,
-                                           evolved_population])
+        merged_population = B.concatenate(
+            [current_population, evolved_population])
+
+        # fitness computation
         fitness_scores = fitness_function(merged_population)
+        metrics = fitness_function.get_metrics()
+
+        # population selection
         top_k_indices = B.top_k_indices(fitness_scores, k=population_size)
         selected_pop = B.take(merged_population, top_k_indices, axis=0)
-        return selected_pop, B.take(fitness_scores, top_k_indices, axis=0)
+
+        return selected_pop, B.take(fitness_scores, top_k_indices,
+                                    axis=0), metrics

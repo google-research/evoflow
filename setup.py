@@ -17,30 +17,25 @@ from setuptools import setup
 from setuptools import find_packages
 
 long_description = open("README.md").read()
-version = '0.1.%s' % int(time())
+version = '0.3.%s' % int(time())
 
-setup(
-    name='geneflow',
-    version=version,
-    description='Genetic Algorithm for humans',
-    long_description=long_description,
-    long_description_content_type="text/markdown",
-    author='Elie Bursztein',
-    author_email='elieb@google.com',
-    url='https://github.com/google/geneflow',
-    license='Apache 2',
-    package_data={"": ["*.json"]},
-    install_requires=[
-            'networkx',
-            'numpy',
-            'tqdm',
-            'tabulate',
-            'termcolor',
-            'matplotlib'],
-    classifiers=[
+setup(name='geneflow',
+      version=version,
+      description='Genetic Algorithm for humans',
+      long_description=long_description,
+      long_description_content_type="text/markdown",
+      author='Elie Bursztein',
+      author_email='elieb@google.com',
+      url='https://github.com/google/geneflow',
+      license='Apache 2',
+      package_data={"": ["*.json"]},
+      install_requires=[
+          'networkx', 'numpy', 'tqdm', 'tabulate', 'termcolor', 'matplotlib',
+          'plotly', 'pandas'
+      ],
+      classifiers=[
           'Development Status :: 5 - Production/Stable',
-          'Intended Audience :: Developers',
-          'Intended Audience :: Education',
+          'Intended Audience :: Developers', 'Intended Audience :: Education',
           'Intended Audience :: Science/Research',
           'License :: OSI Approved :: MIT License',
           'Programming Language :: Python :: 2',
@@ -50,4 +45,4 @@ setup(
           'Topic :: Software Development :: Libraries',
           'Topic :: Software Development :: Libraries :: Python Modules'
       ],
-    packages=find_packages())
+      packages=find_packages())
