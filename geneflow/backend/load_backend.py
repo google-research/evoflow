@@ -15,21 +15,26 @@
 import os
 import sys
 
+_BACKEND = None
+
+# override existing setting to allow reload
 if 'GENEFLOW_BACKEND' in os.environ:
     _BACKEND = os.environ['GENEFLOW_BACKEND']
-else:
+elif not _BACKEND:
     # check if we find cupy
     try:
-        import cupy   # noqa: F403, F401
+        import tensorflow  # noqa: F403, F401
     except ImportError:
         _BACKEND = 'numpy'
     else:
-        _BACKEND = 'cupy'
+        _BACKEND = 'tensorflow'
 
 if _BACKEND == 'numpy':
-        from .numpy import *  # noqa: F403, F401
+    from .numpy import *  # noqa: F403, F401
+elif _BACKEND == 'tensorflow':
+    from .tensorflow import *  # noqa: F403, F401
 elif _BACKEND == 'cupy':
-        from .cupy import *  # noqa: F403, F401
+    from .cupy import *  # noqa: F403, F401
 else:
     raise ImportError("Can't find requested backend ", _BACKEND)
 
@@ -39,3 +44,20 @@ sys.stderr.write('Using %s backend\n' % _BACKEND)
 def backend():
     "Return the backend used"
     return _BACKEND
+
+
+def set_backend(name):
+    """Set Geneflow backend to be a given framework
+
+    Args:
+        name(str): Name of the backend. {cupy, numpy, tensorflow}. Default
+        to tensorflow.
+
+    See:
+        `load_backend.py` for the actual loading code.
+    """
+    global _BACKEND
+    if name not in {'cupy', 'numpy', 'tensorflow'}:
+        raise ValueError('Unknown backend: ' + str(name))
+
+    _BACKEND = name
