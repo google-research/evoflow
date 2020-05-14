@@ -14,50 +14,40 @@
 
 import os
 import sys
-
-_BACKEND = None
+from .common import _BACKEND, set_backend, get_backend
 
 # override existing setting to allow reload
 if 'GENEFLOW_BACKEND' in os.environ:
-    _BACKEND = os.environ['GENEFLOW_BACKEND']
-elif not _BACKEND:
+    set_backend(os.environ['GENEFLOW_BACKEND'])
+elif not get_backend():
     # check if we find cupy
     try:
         import tensorflow  # noqa: F403, F401
     except ImportError:
-        _BACKEND = 'numpy'
+        set_backend('numpy')
     else:
-        _BACKEND = 'tensorflow'
+        set_backend('tensorflow')
 
-if _BACKEND == 'numpy':
+if get_backend() == 'numpy':
     from .numpy import *  # noqa: F403, F401
-elif _BACKEND == 'tensorflow':
+elif get_backend() == 'tensorflow':
     from .tensorflow import *  # noqa: F403, F401
-elif _BACKEND == 'cupy':
+    # ensure we don't run out of memory
+    import tensorflow as tf
+    gpus = tf.config.experimental.list_physical_devices('GPU')
+    if gpus:
+        for gpu in gpus:
+            try:
+                tf.config.experimental.set_memory_growth(gpu, True)
+            except RuntimeError as e:
+                # Memory growth must be set before GPUs have been initialized
+                print(e)
+
+            logical_gpus = tf.config.experimental.list_logical_devices('GPU')
+            sys.stderr.write(len(gpus), "Physical GPUs,", len(logical_gpus),
+                             "Logical GPUs")
+
+elif get_backend() == 'cupy':
     from .cupy import *  # noqa: F403, F401
-else:
-    raise ImportError("Can't find requested backend ", _BACKEND)
 
-sys.stderr.write('Using %s backend\n' % _BACKEND)
-
-
-def backend():
-    "Return the backend used"
-    return _BACKEND
-
-
-def set_backend(name):
-    """Set Geneflow backend to be a given framework
-
-    Args:
-        name(str): Name of the backend. {cupy, numpy, tensorflow}. Default
-        to tensorflow.
-
-    See:
-        `load_backend.py` for the actual loading code.
-    """
-    global _BACKEND
-    if name not in {'cupy', 'numpy', 'tensorflow'}:
-        raise ValueError('Unknown backend: ' + str(name))
-
-    _BACKEND = name
+sys.stderr.write('Using %s backend\n' % get_backend())
