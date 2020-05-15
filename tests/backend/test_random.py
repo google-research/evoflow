@@ -27,41 +27,57 @@ def arr2dlarge():
 def test_shuffle_axis0(backends):
     for B in backends:
         t = B.tensor(arr2d())
-        B.shuffle(t)
-        for col in t:
-            assert col[0] in [1, 4, 7]
-            assert col[1] in [2, 5, 8]
-            assert col[2] in [3, 6, 9]
+
+        # give it 20 tries to ensure consistency
+        for _ in range(20):
+            t = B.shuffle(t)
+            if t[0][0] != 1 or t[1][0] != 4:
+                break
+
+        assert t[0][0] in [1, 4, 7]
+        assert t[1][0] in [1, 4, 7]
+        assert t[2][0] in [1, 4, 7]
+
+        assert t[0][0] != 1 or t[1][0] != 4
 
 
 def test_shuffle_axis1(backends):
     for B in backends:
         t = B.tensor(arr2d())
         cprint(t, 'blue')
-        B.shuffle(t, axis=1)
+
+        # give it 20 tries to ensure consistency
+        for _ in range(20):
+            t = B.shuffle(t, axis=1)
+            if t[0][0] != 1 or t[1][0] != 4:
+                break
+
         cprint(t, 'green')
 
         assert t[0][0] in [1, 2, 3]
         assert t[1][0] in [4, 5, 6]
         assert t[2][0] in [7, 8, 9]
 
+        assert t[0][0] != 1 or t[1][0] != 4
+
 
 def test_full_shuffle(backends):
     for B in backends:
         t = B.tensor(arr2d())
         cprint(t, 'blue')
-        B.full_shuffle(t)
-        cprint(t, 'green')
-
-        ok = False
 
         # give it multiple try as identity is a valid shuffle
-        for _ in range(200):
+
+        for _ in range(20):
+            t = B.full_shuffle(t)
             if (t[0][0] != 1 or t[1][0] != 4) and (t[0][1] != 2
                                                    or t[1][1] != 5):  # noqa
-                ok = True
+
                 break
-        assert ok
+
+        cprint(t, 'green')
+        assert (t[0][0] != 1 or t[1][0] != 4)
+        assert (t[0][1] != 2 or t[1][1] != 5)
 
 
 def test_randint_1D(backends):

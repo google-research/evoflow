@@ -14,6 +14,7 @@
 
 from geneflow.utils import box, unbox
 from geneflow.backend import tensor
+from geneflow.backend import tensor_equal
 
 
 def test_box_unbox():
@@ -26,4 +27,4 @@ def test_box_unbox():
 def test_box_unbox_tensor():
     val = tensor([1, 2, 3])
 
-    assert unbox(box(val)).all() == val.all()
+    assert tensor_equal(unbox(box(val)), val)

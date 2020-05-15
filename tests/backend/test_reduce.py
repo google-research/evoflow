@@ -13,28 +13,25 @@
 # limitations under the License.
 
 
-def test_dot(backends):
-    inputs = [1, 2, 3]
-    inputs2 = [3, 2, 3]
-
+def test_prod(backends):
+    inputs = [1, 2, 3, 4]
     for B in backends:
         tensor = B.tensor(inputs)
-        tensor2 = B.tensor(inputs2)
-        assert B.dot(tensor, tensor2) == 16
+        assert B.prod(tensor) == 24
 
 
 def test_sum(backends):
-    inputs = [1, 2, 3]
+    inputs = [1, 2, 3, 4]
     for B in backends:
         tensor = B.tensor(inputs)
-        assert B.sum(tensor) == 6
+        assert B.sum(tensor) == 10
 
 
 def test_max(backends):
-    inputs = [1, 2, 3]
+    inputs = [1, 2, 3, 4]
     for B in backends:
         tensor = B.tensor(inputs)
-        assert B.max(tensor) == 3
+        assert B.max(tensor) == 4
 
 
 def test_min(backends):

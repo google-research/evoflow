@@ -21,7 +21,7 @@ def test_call_vs_get():
     population = B.randint(1, 10, shape=shape)
     inputs = Input(shape)
     inputs.assign(population)
-    assert inputs.get().all() == inputs.call('').all()
+    assert B.tensor_equal(inputs.get(), inputs.call(''))
 
 
 def test_1d():
@@ -29,7 +29,7 @@ def test_1d():
     population = B.randint(1, 10, shape=shape)
     inputs = Input(shape)
     inputs.assign(population)
-    assert inputs.get().all() == population.all()
+    assert B.tensor_equal(inputs.get(), population)
 
 
 def test_2d():
@@ -37,7 +37,7 @@ def test_2d():
     population = B.randint(1, 10, shape=shape)
     inputs = Input(shape)
     inputs.assign(population)
-    assert inputs.get().all() == population.all()
+    assert B.tensor_equal(inputs.get(), population)
 
 
 def test_non_tensor_input():

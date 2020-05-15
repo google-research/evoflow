@@ -116,5 +116,5 @@ def test_dualcrossover2d_distribution():
         print(c)
         print('mean', B.mean(c), 'min', B.min(c), 'max', B.max(c))
         assert B.min(c) > 50
-        assert B.max(c) < NUM_ITERATIONS / 2
-        assert 200 < B.mean(c) < NUM_ITERATIONS / 2
+        assert B.max(c) < NUM_ITERATIONS // 2
+        assert 200 < B.mean(c) < NUM_ITERATIONS // 2

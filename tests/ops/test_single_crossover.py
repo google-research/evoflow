@@ -72,13 +72,13 @@ def test_1D_shape():
     assert population.shape == POPULATION_SHAPE
     # measuring mutation rate
     diff = B.clip(abs(population - original_population), 0, 1)
-    print(diff, 'cyan')
+    cprint('diff', 'cyan')
+    cprint(diff, 'cyan')
 
     # row test
     num_ones_in_row = 0
     for col in diff:
         num_ones = list(col).count(1)
-        print(num_ones)
         num_ones_in_row = max(num_ones, num_ones_in_row)
 
     max_one_in_row = POPULATION_SHAPE[1] * crossover_size_fraction
@@ -86,7 +86,7 @@ def test_1D_shape():
     assert num_ones_in_row
 
     # col
-    diff = diff.T
+    diff = B.transpose(diff)
     num_ones_in_col = 0
     for col in diff:
         num_ones_in_col = max(list(col).count(1), num_ones_in_col)

@@ -13,5 +13,5 @@
 # limitations under the License.
 __version__ = '0.3.0'
 from geneflow.engine.geneflow import GeneFlow  # noqa: F401
-from geneflow.backend.load_backend import set_backend  # noqa: F401
-from geneflow.backend.load_backend import backend  # noqa: F401
+from geneflow.backend.common import set_backend  # noqa: F401
+from geneflow.backend.common import get_backend  # noqa: F401

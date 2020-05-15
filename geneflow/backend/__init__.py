@@ -12,13 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .load_backend import backend  # noqa: F401
+# - shared function --
+# ! Dont import loader related funciton here - will break everything
+# ! instead if needed (like set_backend()) put then in root __init__.py
+from .common import floatx  # noqa: F401
+from .common import set_floatx  # noqa: F401
+from .common import intx  # noqa: F401
+from .common import set_intx  # noqa: F401
 
 # -initialization-
+from .load_backend import tensor  # noqa: F401
 from .load_backend import copy  # noqa: F401
 from .load_backend import zeros  # noqa: F401
 from .load_backend import ones  # noqa: F401
-from .load_backend import full  # noqa: F401
+from .load_backend import fill  # noqa: F401
 from .load_backend import normal  # noqa: F401
 
 # - reduce -
@@ -27,19 +34,23 @@ from .load_backend import max  # noqa: F401
 from .load_backend import min  # noqa: F401
 from .load_backend import sum  # noqa: F401
 from .load_backend import mean  # noqa: F401
+from .load_backend import sqrt  # noqa: F401
 
 # - Manipulation -
+from .load_backend import assign  # noqa: F401
 from .load_backend import tile  # noqa: F401
-from .load_backend import tensor  # noqa: F401
 from .load_backend import concatenate  # noqa: F401
 
 # - Utils -
+from .load_backend import transpose  # noqa: F401
+from .load_backend import cast  # noqa: F401
+from .load_backend import dtype  # noqa: F401
 from .load_backend import flatten  # noqa: F401
 from .load_backend import as_numpy_array  # noqa: F401
 from .load_backend import reshape  # noqa: F401
 from .load_backend import is_tensor  # noqa: F401
 from .load_backend import tensor_equal  # noqa: F401
-from .load_backend import allclose  # noqa: F401
+from .load_backend import assert_near  # noqa: F401
 
 # - Math -
 from .load_backend import dot  # noqa: F401
@@ -50,7 +61,7 @@ from .load_backend import divide  # noqa: F401
 from .load_backend import mod  # noqa: F401
 from .load_backend import clip  # noqa: F401
 from .load_backend import abs  # noqa: F401
-from .load_backend import absolute  # noqa: F401
+from .load_backend import broadcasted_norm  # noqa: F401
 from .load_backend import norm  # noqa: F401
 
 # - Randomness -

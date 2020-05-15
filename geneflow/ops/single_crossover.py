@@ -62,7 +62,7 @@ class SingleCrossover(OP):
 
         # mix genomes
         population_copy = B.copy(population)
-        B.shuffle(population_copy)
+        population_copy = B.shuffle(population_copy)
 
         # how many chromosomes to crossover
         num_crossovers = int(population.shape[0] * self.population_fraction)
@@ -94,7 +94,7 @@ class SingleCrossover(OP):
 
         # crossover
         cross_section = population_copy[self.slices]
-        population[self.slices] = cross_section
+        population = B.assign(population, cross_section, self.slices)
 
         return population
 

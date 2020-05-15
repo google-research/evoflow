@@ -63,7 +63,7 @@ class UniformCrossover(OP):
 
         # mix genomes
         population_copy = B.copy(population)
-        B.shuffle(population_copy)
+        population_copy = B.shuffle(population_copy)
 
         # how many chromosomes to crossover?
         num_crossovers = int(population.shape[0] * self.population_fraction)
@@ -74,7 +74,7 @@ class UniformCrossover(OP):
         if not self.has_cache:
             self.print_debug("Creating x_matrix and mutation_matrix")
             self.has_cache = True
-            self.x_matrix = B.zeros(population.shape, dtype='int')
+            self.x_matrix = B.zeros(population.shape, dtype=B.intx())
 
             # We need to accounting for the fact that the population
             # can be of rank N which makes the fancy indexing painful.
@@ -97,11 +97,11 @@ class UniformCrossover(OP):
             slices = tuple(slices)
 
             # injecting mutations
-            self.x_matrix[slices] = mutations
+            self.x_matrix = B.assign(self.x_matrix, mutations, slices)
         else:
             self.print_debug("Using cached matrix")
 
-        B.full_shuffle(self.x_matrix)
+        self.x_matrix = B.full_shuffle(self.x_matrix)
 
         # invert crossover matrix
         inv_x_matrix = B.abs((self.x_matrix) - 1)

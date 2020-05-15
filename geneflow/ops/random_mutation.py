@@ -21,7 +21,7 @@ class RandomMutations(OP):
     def __init__(self,
                  population_fraction,
                  mutations_probability,
-                 min_gene_value=None,
+                 min_gene_value=0,
                  max_gene_value=None,
                  min_mutation_value=1,
                  max_mutation_value=1,
@@ -36,7 +36,7 @@ class RandomMutations(OP):
             genes should be affected by the mutations.
 
             min_gene_value = (int, optional): min value a gene can take.
-            Defaults to None.
+            Defaults to 0.
 
             max_gene_value = (int, optional): max value a gene can take.
             Defaults to None.
@@ -107,13 +107,13 @@ class RandomMutations(OP):
                                   self.max_mutation_value + 1,
                                   shape=sub_tensor_shape)
             # blank mask
-            mask = B.zeros(population.shape)
+            mask = B.zeros(population.shape, dtype=B.intx())
 
             # add mutations
-            mask[slices] = mutations
+            mask = B.assign(mask, mutations, slices)
 
             # shuffle mask every axis
-            B.full_shuffle(mask)
+            mask = B.full_shuffle(mask)
 
             # mutate
             population = population + mask
@@ -134,7 +134,7 @@ class RandomMutations1D(RandomMutations):
     def __init__(self,
                  population_fraction=0.9,
                  mutations_probability=0.5,
-                 min_gene_value=None,
+                 min_gene_value=0,
                  max_gene_value=None,
                  min_mutation_value=1,
                  max_mutation_value=1,
@@ -156,7 +156,7 @@ class RandomMutations2D(RandomMutations):
     def __init__(self,
                  population_fraction=0.9,
                  mutations_probability=(0.5, 0.5),
-                 min_gene_value=None,
+                 min_gene_value=0,
                  max_gene_value=None,
                  min_mutation_value=1,
                  max_mutation_value=1,
@@ -178,7 +178,7 @@ class RandomMutations3D(RandomMutations):
     def __init__(self,
                  population_fraction=0.9,
                  mutations_probability=(0.5, 0.5, 0.5),
-                 min_gene_value=None,
+                 min_gene_value=0,
                  max_gene_value=None,
                  min_mutation_value=0,
                  max_mutation_value=1,

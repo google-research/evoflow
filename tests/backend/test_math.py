@@ -13,6 +13,62 @@
 # limitations under the License.
 
 
+def test_dot(backends):
+    inputs = [1, 2, 3]
+    inputs2 = [3, 2, 3]
+
+    for B in backends:
+        tensor = B.tensor(inputs)
+        tensor2 = B.tensor(inputs2)
+        product = B.dot(tensor, tensor2)
+        assert product == 16
+
+
+def test_dot_scalar(backends):
+    inputs = [1, 2, 3]
+    scalar = 2
+
+    for B in backends:
+        scalar_t = B.tensor(scalar)
+        tensor = B.tensor(inputs)
+        product = B.dot(tensor, scalar_t)
+        assert B.tensor_equal(product, B.tensor([2, 4, 6]))
+
+
+def test_dot_scalar_scalar(backends):
+    scalar = 2
+    scalar2 = 3
+
+    for B in backends:
+        t = B.tensor(scalar)
+        t2 = B.tensor(scalar2)
+        product = B.dot(t, t2)
+        assert B.tensor_equal(product, B.tensor(6))
+
+
+def test_dot_2d_2d(backends):
+    arr = [[1, 2, 3], [3, 2, 1]]
+    for B in backends:
+        t = B.tensor(arr)
+        t2 = B.transpose(t)
+        product = B.dot(t, t2)
+        assert B.tensor_equal(product, B.tensor([[14, 10], [10, 14]]))
+
+
+def test_dot_2d_1d(backends):
+    arr = [[1, 0, 1, 1, 0, 1, 1, 1], [1, 1, 1, 0, 1, 1, 1, 1],
+           [1, 0, 1, 1, 0, 1, 1, 1]]
+    arr2 = [1, 0, 1, 1, 0, 1, 1, 1]
+    for B in backends:
+        t = B.tensor(arr)
+        t2 = B.tensor(arr2)
+        product = B.dot(t, t2)
+        print('product', product)
+        expected = B.tensor([6, 5, 6])
+        print('expected', expected)
+        assert B.tensor_equal(product, expected)
+
+
 def test_add(backends):
     inputs = [1, 2, 3]
     inputs2 = [1, 2, 3]
@@ -50,7 +106,11 @@ def test_divide(backends):
     for B in backends:
         tensor = B.tensor(inputs)
         tensor2 = B.tensor(inputs2)
-        assert B.tensor_equal(B.divide(tensor, tensor2), B.tensor(expected))
+        div_results = B.divide(tensor, tensor2)
+        print('result', div_results)
+        expected_tensor = B.tensor(expected)
+        print('expected', expected_tensor)
+        assert B.tensor_equal(div_results, expected_tensor)
 
 
 def test_mod(backends):
@@ -68,4 +128,5 @@ def test_norm(backends):
     expected = 3.7416573867739413
     for B in backends:
         tensor = B.tensor(inputs)
-        assert B.norm(tensor) == expected
+        norm = B.norm(B.cast(tensor, 'float32'))
+        assert norm - expected < 0.0001

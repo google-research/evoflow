@@ -17,17 +17,16 @@ import geneflow.backend as B
 
 
 def test_sum2d():
-    t = B.randint(0, 10, (10, 10, 10))
-    v = Sum().call(t)
+    t = [[[1, 1, 1], [1, 1, 1], [1, 1, 1]], [[1, 1, 1], [1, 1, 1], [1, 1, 1]],
+         [[1, 1, 1], [1, 1, 1], [1, 1, 1]]]
+    inputs = B.tensor(t)
+    print(inputs)
+    result = Sum().call(inputs)
+    assert result.shape == (3, )
+    print(result)
 
-    result = []
-    for r in t:
-        result.append(B.sum(r, axis=-1))
-    result = B.tensor(result)
-
-    assert v.shape == (10, )
-    for idx, a in enumerate(v):
-        assert v[idx].all() == result[idx].all()
+    expected = B.tensor([9, 9, 9])
+    assert B.tensor_equal(result, expected)
 
 
 def test_max_gene_val_2d():

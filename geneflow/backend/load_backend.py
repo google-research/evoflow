@@ -44,8 +44,9 @@ elif get_backend() == 'tensorflow':
                 print(e)
 
             logical_gpus = tf.config.experimental.list_logical_devices('GPU')
-            sys.stderr.write(len(gpus), "Physical GPUs,", len(logical_gpus),
-                             "Logical GPUs")
+            msg = "GPUs Physical: %d - Logical GPU:%d\n" % (len(gpus),
+                                                            len(logical_gpus))
+            sys.stderr.write(msg)
 
 elif get_backend() == 'cupy':
     from .cupy import *  # noqa: F403, F401

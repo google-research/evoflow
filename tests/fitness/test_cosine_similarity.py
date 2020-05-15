@@ -30,9 +30,9 @@ def test_cosine_similarity_1dpopulation(backends):
     # similar vector have a distance of 1
     distances = cs(population)
     print("distances", distances)
-    assert int(distances[0]) == 1
-    assert distances[1] < 1
-    assert int(distances[2]) == 1
+    assert B.assert_near(distances[0], 1, absolute_tolerance=0.001)
+    assert not B.assert_near(distances[1], 1, absolute_tolerance=0.001)
+    assert B.assert_near(distances[2], 1, absolute_tolerance=0.001)
 
 
 def test_cosine_2d(backends):
@@ -41,15 +41,20 @@ def test_cosine_2d(backends):
     ref_chromosome = B.randint(0, 2, (32, 32))
     ref_pop = B.randint(0, 2, (64, 32, 32))
 
+    ref_pop = B.as_numpy_array(ref_pop)
+    inserstion = B.as_numpy_array(ref_chromosome)
     for idx in INSERTION_POINTS:
-        ref_pop[idx] = ref_chromosome
+        ref_pop[idx] = inserstion
+
+    ref_pop = B.tensor(ref_pop)
 
     cs = InvertedCosineSimilarity(ref_chromosome)
     distances = cs(ref_pop)
+    print(distances)
 
     for idx, dst in enumerate(distances):
         if idx in INSERTION_POINTS:
-            assert int(dst) == 1
+            assert B.assert_near(dst, 1.0, absolute_tolerance=0.001)
         else:
             assert dst < 1
             assert dst > 0

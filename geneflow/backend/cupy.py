@@ -16,7 +16,29 @@ import cupy as cp
 # sometime numpy is faster / cupy don't have the op.
 import numpy  # DON'T IMPORT AS np -- make it hard to distinguish with cupy.
 
+from .common import _infer_dtype
+
+
 # -initialization-
+def tensor(a, dtype=None):
+    """Converts an object to a tensor.
+
+    Args:
+        a: The source object.
+        dtype: Data type specifier. It is inferred from the input by default.
+    Returns:
+        ndarray: An array on the current device. If ``a`` is already on
+        the device, no copy is performed.
+
+    """
+    if is_tensor(a):
+        return a
+
+    if not dtype and not isinstance(a, numpy.ndarray):
+        # automatic inference based of floatx and intx settings
+        dtype = _infer_dtype(a)
+
+    return cp.array(a, dtype)
 
 
 def copy(tensor):
@@ -56,20 +78,19 @@ def ones(shape, dtype=float):
     return cp.ones(shape, dtype=dtype)
 
 
-def full(shape, fill_value, dtype=float):
+def fill(shape, fill_value):
     """Returns a new Tensor of given shape and dtype, filled with the provided
     value.
 
     Args:
         shape (int or tuple of ints): Dimensionalities of the array.
-        fill_value: The value to fill with.
-        dtype: Data type specifier.
+        fill_value (int): The value to fill with..
 
     Returns:
         ndarray: An tensor filled with zeros.
 
     """
-    return cp.full(shape, fill_value, dtype)
+    return cp.full(shape, fill_value)
 
 
 def normal(shape, mean=0.0, dev=1.0):
@@ -77,18 +98,18 @@ def normal(shape, mean=0.0, dev=1.0):
 
     Args:
         shape (int or tuple of ints): Dimensionalities of the array.
-        mean: Mean values.
-        dev: Standard deviations.
+        mean (float): Mean value. Default to 0.0.
+        dev (float): Standard deviations. Default to 1.0.
 
     Returns:
-        ndarray: An tensor filled with zeros.
+        ndarray: Drawn samples from the parameterized normal distribution.
 
     """
     return cp.random.normal(loc=mean, scale=dev, size=shape)
 
 
 # - Reduce -
-def prod(tensor, axis=None, dtype=None, out=None, keepdims=False):
+def prod(tensor, axis=None, keepdims=False):
     """Returns the product of an array along a given axis.
 
     Args:
@@ -96,17 +117,16 @@ def prod(tensor, axis=None, dtype=None, out=None, keepdims=False):
         axis (int): Along which axis to take the maximum. The flattened array
             is used by default. Defaults to None.
         dtype: Data type specifier.
-        out (ndarray): Output array. Default to None.
         keepdims (bool): If ``True``, the axis is kept as an axis of
         size one. Default to False.
 
     Returns:
         ndarray: The maximum of ``tensor``, along the axis if specified.
     """
-    return cp.prod(tensor, axis=axis, out=out, keepdims=keepdims, dtype=dtype)
+    return cp.prod(tensor, axis=axis, keepdims=keepdims)
 
 
-def max(tensor, axis=None, out=None, keepdims=False):
+def max(tensor, axis=None, keepdims=False):
     """Returns the maximum of an array or the maximum along a given axis.
 
     Note::
@@ -117,7 +137,6 @@ def max(tensor, axis=None, out=None, keepdims=False):
         tensor (ndarray): Array to take the maximum.
         axis (int): Along which axis to take the maximum. The flattened array
             is used by default. Defaults to None.
-        out (ndarray): Output array. Default to None.
         keepdims (bool): If ``True``, the axis is kept as an axis of
         size one. Default to False.
 
@@ -127,12 +146,12 @@ def max(tensor, axis=None, out=None, keepdims=False):
 
     # cupy don't support keepdims.
     if keepdims:
-        return numpy.amax(tensor, axis=axis, out=out, keepdims=keepdims)
+        return numpy.amax(tensor, axis=axis, keepdims=keepdims)
     else:
-        return cp.amax(tensor, axis=axis, out=out, keepdims=keepdims)
+        return cp.amax(tensor, axis=axis, keepdims=keepdims)
 
 
-def min(tensor, axis=None, out=None, keepdims=False):
+def min(tensor, axis=None, keepdims=False):
     """Returns the minimum of an array or the maximum along an axis.
 
     Note::
@@ -143,8 +162,6 @@ def min(tensor, axis=None, out=None, keepdims=False):
         tensor (ndarray): Array to take the maximum.
         axis (int): Along which axis to take the maximum. The flattened array
             is used by default. Defaults to None.
-        out (ndarray): Output array. Default to None.
-
         keepdims (bool): If ``True``, the axis is kept as an axis of
         size one. Default to False.
 
@@ -154,19 +171,17 @@ def min(tensor, axis=None, out=None, keepdims=False):
 
     # cupy don't support keepdims.
     if keepdims:
-        return numpy.amin(tensor, axis=axis, out=out, keepdims=keepdims)
+        return numpy.amin(tensor, axis=axis, keepdims=keepdims)
     else:
-        return cp.amin(tensor, axis=axis, out=out, keepdims=keepdims)
+        return cp.amin(tensor, axis=axis, keepdims=keepdims)
 
 
-def sum(tensor, axis=None, dtype=None, out=None, keepdims=False):
+def sum(tensor, axis=None, keepdims=False):
     """Returns the sum of an array along given axes.
 
     Args:
         tensor (ndarray): Array to sum reduce.
         axis (int or sequence of ints): Axes along which the sum is taken.
-        dtype: Data type specifier.
-        out (cupy.ndarray): Output array.
         keepdims (bool): If ``True``, the specified axes are remained as axes
         of length one.
 
@@ -174,42 +189,53 @@ def sum(tensor, axis=None, dtype=None, out=None, keepdims=False):
     Returns:
         ndarray: The sum of ``tensor``, along the axis if specified.
     """
-    return cp.sum(tensor, axis=axis, dtype=dtype, out=out, keepdims=keepdims)
+    return cp.sum(tensor, axis=axis, keepdims=keepdims)
 
 
-def mean(tensor, axis=None, dtype=None, out=None, keepdims=False):
+def mean(tensor, axis=None, keepdims=False):
     """Returns the sum of an array along given axes.
 
     Args:
         tensor (ndarray): Array to mean reduce.
         axis (int or sequence of ints): Axes along which the sum is taken.
-        out (cupy.ndarray): Output array.
         dtype: Data type specifier.
         keepdims (bool): If ``True``, the specified axes are remained as axes
         of length one.
-        dtype: Data type specifier.
 
     Returns:
         ndarray: The mean of ``tensor``, along the axis if specified.
     """
-    return cp.mean(tensor, axis=axis, dtype=dtype, out=out, keepdims=keepdims)
+    return cp.mean(tensor, axis=axis, keepdims=keepdims)
+
+
+def sqrt(tensor):
+    """Computes element-wise square root of the input tensor.
+
+    Args:
+        tensor (ndarray): tensor
+
+    Returns:
+        tensor: square root of the input tensor.
+    """
+    return cp.sqrt(tensor)
 
 
 # - Manipulation -
 
 
-def tensor(a, dtype=None):
-    """Converts an object to a tensor.
+def assign(dst_tensor, values, slices):
+    """ assign values in tensor at the position specified by the slices.
 
     Args:
-        a: The source object.
-        dtype: Data type specifier. It is inferred from the input by default.
+        dst_tensor (ndarray): Target tensor
+        values (ndarray): Tensor containing the values to assign.
+        slices (tuple): slices that defines where to put the values.
     Returns:
-        ndarray: An array on the current device. If ``a`` is already on
-        the device, no copy is performed.
+        ndarray: tensor with the assigned values.
 
     """
-    return cp.array(a, dtype)
+    dst_tensor[slices] = values
+    return dst_tensor
 
 
 def tile(tensor, reps):
@@ -238,6 +264,35 @@ def concatenate(tup, axis=0):
 
 
 # - Utils -
+
+
+def transpose(a):
+    "Transpose the tensor"
+    return cp.transpose(a)
+
+
+def cast(tensor, dtype):
+    """Cast
+
+    Args:
+        tensor (Tensor): tensor to cast.
+        dtype (str): type to cast. Usually floatx or intx
+    """
+    return tensor.astype(dtype)
+
+
+def dtype(tensor):
+    """"Returns the dtype of a tensor as a string.
+
+    Args:
+        tensor (tensor): Tensor
+
+    Returns:
+        str: type of the tensor as string. e.g int32.
+    """
+    return tensor.dtype.name
+
+
 def flatten(tensor):
     """Returns a copy of the tensor flatten into one dimension.
 
@@ -287,17 +342,26 @@ def tensor_equal(tensor1, tensor2):
     return (tensor1 == tensor2).all()
 
 
-def allclose(a, b, absolute_tolerance=0.1):
+def assert_near(a, b, absolute_tolerance=0, relative_tolerance=0):
     """
     Returns True if two arrays are element-wise equal within a tolerance.
 
     Args:
         a (ndarray): Tensor with a last dimension of at least k size.
         b (ndarray): Tensor with a last dimension of at least k size.
-        absolute_tolerance: Defined as abs(a[i]-b[i]) < absolute_tolerance.
+        absolute_tolerance (float): Default to 0
+        relative_tolerance (float): Default to 0
+
+    Returns:
+        bool: True if the two arrays are equal within the given tolerance; False otherwise.
+
+    Note:
+        This function return True if the following equation is satisfied:
+        `absolute(a - b) <= (absolute_tolerance + relative_tolerance * absolute(b))`  # noqa
 
     """
-    return cp.allclose(a, b, atol=absolute_tolerance, rtol=0)
+
+    return cp.allclose(a, b, atol=absolute_tolerance, rtol=relative_tolerance)
 
 
 # - Math -
@@ -314,15 +378,14 @@ def dot(t1, t2):
     return cp.dot(t1, t2)
 
 
-def add(tensor1, tensor2, dtype=None):
+def add(tensor1, tensor2):
     """Add two tensors
 
     Args:
         tensor1 (ndarray): Left tensor.
         tensor2 (ndarray): right tensor.
-        dtype (dtype): type of the returned tensor.
     """
-    return cp.add(tensor1, tensor2, dtype=dtype)
+    return cp.add(tensor1, tensor2)
 
 
 def subtract(tensor1, tensor2, dtype=None):
@@ -331,45 +394,41 @@ def subtract(tensor1, tensor2, dtype=None):
     Args:
         tensor1 (ndarray): Left tensor.
         tensor2 (ndarray): right tensor.
-        dtype (dtype): type of the returned tensor.
     """
-    return cp.subtract(tensor1, tensor2, dtype=dtype)
+    return cp.subtract(tensor1, tensor2)
 
 
-def multiply(tensor1, tensor2, dtype=None):
+def multiply(tensor1, tensor2):
     """multiply two tensors
 
     Args:
         tensor1 (ndarray): Left tensor.
         tensor2 (ndarray): right tensor.
-        dtype (dtype): type of the returned tensor.
     """
-    return cp.multiply(tensor1, tensor2, dtype=dtype)
+    return cp.multiply(tensor1, tensor2)
 
 
-def divide(numerator, denominator, dtype=None):
+def divide(numerator, denominator):
     """divide a tensor by another
 
     Args:
         tensor1 (ndarray): numerator tensor.
         tensor2 (ndarray): denominator tensor.
-        dtype (dtype): type of the returned tensor.
     """
-    return cp.divide(numerator, denominator, dtype=dtype)
+    return cp.divide(numerator, denominator)
 
 
-def mod(numerator, denominator, dtype=None):
+def mod(numerator, denominator):
     """Compute the reminder of the divisin of a tensor by another
 
     Args:
         tensor1 (ndarray): numerator tensor.
-        tensor2 (ndarray): denominator tensor.
-        dtype (dtype): type of the returned tensor.
+        tensor2 (ndarray): denominator tensor..
     """
-    return cp.mod(numerator, denominator, dtype=dtype)
+    return cp.mod(numerator, denominator)
 
 
-def clip(tensor, min_val=None, max_val=None, out=None):
+def clip(tensor, min_val=0, max_val=None):
     """Clips the values of a tensor to a given interval. For example,
     if an interval of [0, 1] is specified, values smaller than 0 become 0,
     and values larger than 1 become 1.
@@ -379,17 +438,16 @@ def clip(tensor, min_val=None, max_val=None, out=None):
     Args:
         tensor (ndarray): The input Tensor.
 
-        min_val (scalar, ndarray or None): The left side of the interval. When
-        None ignored.  Defaults to None.
+        min_val (scalar, ndarray): The left side of the interval.
+        Defaults to 0.
 
         max_val (scalar, ndarray or None): The right side of the interval. When
         None ignored.  Defaults to None.
 
-        out (ndarray): Output array. Mostly used for inplace.
     Returns:
         ndarray: Clipped tensor.
     """
-    return cp.clip(tensor, a_min=min_val, a_max=max_val, out=out)
+    return cp.clip(tensor, a_min=min_val, a_max=max_val)
 
 
 def abs(tensor):
@@ -397,9 +455,9 @@ def abs(tensor):
     return cp.absolute(tensor)
 
 
-def absolute(tensor):
-    "Calculate the tensor norm fosrm."
-    return cp.absolute(tensor)
+def broadcasted_norm(tensor):
+    "Norm broadcasted accross dimensions"
+    return cp.sum(cp.abs(tensor)**2, axis=-1)**0.5
 
 
 def norm(tensor, ord=None, axis=None, keepdims=False):
@@ -461,17 +519,21 @@ def shuffle(tensor, axis=0):
         axis (int, optional): axis to shuffle on. Default to 0.
 
     Returns:
-        None: in place shuffling
+        Tensor: shuffled tensor
     """
+    # ! we must return the tensor because other backend don't do shuffle
+    # ! in place.
+
     if not axis:
         cp.random.shuffle(tensor)
     else:
         size = tensor.shape[axis]
         # cupy don't support new numpy rng system, so have to do it ourselves.
         cp.take(tensor, cp.random.rand(size).argsort(), axis=axis, out=tensor)
+    return tensor
 
-        # alternative version
-        # cp.take(tensor, cp.random.permutation(size), axis=axis, out=tensor)
+    # alternative version
+    # cp.take(tensor, cp.random.permutation(size), axis=axis, out=tensor)
 
 
 def full_shuffle(tensor):
@@ -481,21 +543,16 @@ def full_shuffle(tensor):
         tensor (ndarray): tensor to shuffle.
 
     Returns:
-        None: in place shuffling
+        Tensor: shuffled tensor
 
     """
+    # ! we must return the tensor because other backend don't do shuffle
+    # ! in place.
 
     for idx in range(len(tensor.shape)):
         shuffle(tensor, axis=idx)
 
-    # alternative
-    # total_chromosome_size = B.prod(B.tensor(self.x_matrix.shape[1:]))
-    # flatten_shape = (self.x_matrix.shape[0],
-    #                    int(total_chromosome_size))
-    # self.flatten_x_matrix = B.reshape(self.x_matrix, flatten_shape)
-    # B.shuffle(self.flatten_x_matrix)
-    # B.shuffle(self.flatten_x_matrix.T)
-    # self.x_matrix = B.reshape(self.flatten_x_matrix, self.x_matrix.shape)
+    return tensor
 
 
 # - Indexing -
@@ -513,15 +570,16 @@ def take(tensor, indices, axis=None, out=None):
         axis (int, optional): The axis along which to select indices from.
         The flattened input is used by default. Defaults to None.
 
-        out (ndarray. Optional): Output array. If provided, it should be of
-            appropriate shape and dtype. Defaults to None.
     Returns:
         ndarray: Tensor containing the values from the specified indices.
     """
-    return cp.take(tensor, indices, axis=axis, out=out)
+    return cp.take(tensor, indices, axis=axis)
 
 
-def top_k_indices(tensor, k, axis=-1):
+def top_k_indices(
+    tensor,
+    k,
+):
     """
     Finds the indices of the k largest entries alongside an axis.
 
@@ -529,10 +587,6 @@ def top_k_indices(tensor, k, axis=-1):
         tensor (ndarray): Tensor with a last dimension of at least k size.
 
         k (i): number of elements to return.
-
-        axis (int or None) - Axis along which to sort. Default is -1,
-        which is the last axis. If None is supplied,
-        the array will be flattened before sorting.
 
     """
     k = -k  # reverse to get top elements
@@ -553,10 +607,6 @@ def bottom_k_indices(tensor, k, axis=-1):
         tensor (ndarray): Tensor with a last dimension of at least k size.
 
         k (i): number of elements to return.
-
-        axis (int or None) - Axis along which to sort. Default is -1,
-        which is the last axis. If None is supplied,
-        the array will be flattened before sorting.
 
     """
     idxs = cp.argpartition(tensor, k)[:k]

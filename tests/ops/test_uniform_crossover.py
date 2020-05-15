@@ -44,16 +44,17 @@ def test_uniform_2Dcrossover_randomness_shape():
     mutated_rows = crossover_probability[0] * GENOME_SHAPE[1]
     mutated_cells = crossover_probability[0] * GENOME_SHAPE[2]
     for cidx, c in enumerate(mutated_chromosomes):
-        mr = 0
-        mc = 0
+        mr = 0.0
+        mc = 0.0
         for r in c:
-            s = B.sum(r)
+            s = B.cast(B.sum(r), B.floatx())
             if s:
                 mr += 1
                 mc += s
 
         assert abs(mutated_rows - mr) < 2
-        assert abs(mutated_cells - (mc // mutated_rows)) < 2
+        assert abs(B.cast(mutated_cells, B.floatx()) -
+                   (mc / mutated_rows)) < 2.0  # noqa
 
 
 def test_uniformcrossover2d_distribution():

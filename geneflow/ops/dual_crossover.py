@@ -62,7 +62,7 @@ class DualCrossover(OP):
 
         # mix genomes
         population_copy = B.copy(population)
-        B.shuffle(population_copy)
+        population_copy = B.shuffle(population_copy)
 
         # how many chromosomes to crossover
         num_crossover_chromosomes = int(population.shape[0] *
@@ -102,7 +102,7 @@ class DualCrossover(OP):
 
         # crossover
         cross_section = population_copy[slices]
-        population[slices] = cross_section
+        population = B.assign(population, cross_section, slices)
 
         return population
 

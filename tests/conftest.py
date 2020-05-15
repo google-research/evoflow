@@ -15,6 +15,14 @@
 import pytest
 import logging
 
+# need to be done as early as possible
+try:
+    import tensorflow as tf
+except:  # noqa
+    pass
+else:
+    tf.config.set_visible_devices([], 'GPU')
+
 
 @pytest.fixture(scope="session")
 def backends():
@@ -27,7 +35,7 @@ def backends():
     logger = logging.getLogger()
 
     try:
-        import cupy  # noqa
+        import cupy as cp  # noqa
         logger.info('cupy found')
     except:  # noqa
         import geneflow.backend.numpy as CP
@@ -35,4 +43,16 @@ def backends():
     else:
         import geneflow.backend.cupy as CP
 
-    return [NP, CP]
+    try:
+        import tensorflow as tf
+
+        # forcing CPU only otherwise tests are flaky
+
+        logger.info('TensorFlow found')
+    except:  # noqa
+        import geneflow.backend.numpy as TF
+        logger.info('TensorFlow not found - using numpy instead')
+    else:
+        import geneflow.backend.tensorflow as TF
+
+    return [NP, CP, TF]

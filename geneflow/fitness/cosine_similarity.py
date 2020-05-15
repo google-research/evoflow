@@ -34,22 +34,19 @@ class InvertedCosineSimilarity(FitnessFunction):
         self.ref_chromosome = B.flatten(B.tensor(reference_chromosome))
 
         # caching ref pop norm
-        self.ref_norm = B.norm(self.ref_chromosome)
+        self.ref_norm = B.norm(B.cast(self.ref_chromosome, B.floatx()))
 
     def call(self, population):
         # cosine only works on 1D array we need to flatten
         flat_pop = self._flatten_population(population)
 
-        print('flat_pop', flat_pop.shape)
-        print('ref_chromosome', self.ref_chromosome.shape)
         # numerator
-        numerator = B.dot(flat_pop, self.ref_chromosome)
-
+        numerator = B.cast(B.dot(flat_pop, self.ref_chromosome), B.floatx())
         # denominator (norm(u) *  norm(v))
         # ! B.norm is not broadcasted we need our own version
-        population_norm = B.sum(B.abs(flat_pop)**2, axis=-1)**0.5
+        population_norm = B.broadcasted_norm(flat_pop)
+
+        # population_norm = B.norm(B.cast(flat_pop, B.floatx()), axis=0)
         denominator = population_norm * self.ref_norm
 
-        print(numerator)
-        print(denominator)
         return (numerator / denominator)

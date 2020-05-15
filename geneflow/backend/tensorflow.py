@@ -12,8 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import numpy as np
-from .common import _infer_dtype
+from termcolor import cprint
+import tensorflow as tf
+from tensorflow.errors import InvalidArgumentError
+
+from .common import _infer_dtype, intx, floatx
+import numpy
 
 
 # -initialization-
@@ -31,11 +35,11 @@ def tensor(a, dtype=None):
     if is_tensor(a):
         return a
 
-    if not dtype:
+    if not dtype and not isinstance(a, numpy.ndarray):
         # automatic inference based of floatx and intx settings
         dtype = _infer_dtype(a)
 
-    return np.asarray(a, dtype)
+    return tf.convert_to_tensor(a, dtype=dtype)
 
 
 def copy(tensor):
@@ -46,20 +50,20 @@ def copy(tensor):
     Returns
         ndarray: copied tensor
     """
-    return np.copy(tensor)
+    return tf.identity(tensor)
 
 
 def zeros(shape, dtype=float):
     """Returns a new Tensor of given shape and dtype, filled with zeros.
     Args:
         shape (int or tuple of ints): Dimensionalities of the array.
-        dtype: Data type specifier.
+        dtype (str, optional): dtype: Data type specifier. Defaults to 'l'.
 
     Returns:
         ndarray: An tensor filled with zeros.
 
     """
-    return np.zeros(shape, dtype=dtype)
+    return tf.zeros(shape, dtype=dtype)
 
 
 def ones(shape, dtype=float):
@@ -72,7 +76,7 @@ def ones(shape, dtype=float):
         ndarray: An tensor filled with zeros.
 
     """
-    return np.ones(shape, dtype=dtype)
+    return tf.ones(shape, dtype=dtype)
 
 
 def fill(shape, fill_value):
@@ -82,27 +86,27 @@ def fill(shape, fill_value):
     Args:
         shape (int or tuple of ints): Dimensionalities of the array.
         fill_value (int): The value to fill with.
-        dtype: Data type specifier.
 
     Returns:
         ndarray: An tensor filled with zeros.
 
     """
-    return np.full(shape, fill_value)
+    return tf.fill(shape, fill_value)
 
 
-def normal(shape, mean=0.0, stddev=1.0):
+def normal(shape, mean=0, stddev=1.0):
     """Draw random samples from a normal (Gaussian) distribution.
+
     Args:
         shape (int or tuple of ints): Dimensionalities of the array.
         mean (float): Mean value. Default to 0.0.
-        dev (float): Standard deviations. Default to 1.0.
+        stddev (float): Standard deviations. Default to 1.0.
 
     Returns:
         ndarray: Drawn samples from the parameterized normal distribution.
 
     """
-    return np.random.normal(loc=mean, scale=stddev, size=shape)
+    return tf.random.normal(shape, mean=mean, stddev=stddev)
 
 
 # - Reduce -
@@ -113,18 +117,17 @@ def prod(tensor, axis=None, keepdims=False):
         tensor (ndarray): Array to take the maximum.
         axis (int): Along which axis to take the maximum. The flattened array
             is used by default. Defaults to None.
-        dtype: Data type specifier.
         keepdims (bool): If ``True``, the axis is kept as an axis of
         size one. Default to False.
 
     Returns:
         ndarray: The maximum of ``tensor``, along the axis if specified.
     """
-    return np.prod(tensor, axis=axis, keepdims=keepdims)
+    return tf.math.reduce_prod(tensor, axis=axis, keepdims=keepdims)
 
 
 def max(tensor, axis=None, keepdims=False):
-    """Returns the maximum of an array or the maximum along an axis.
+    """Returns the maximum of an array or the maximum along a given axis.
 
     Note::
        When at least one element is NaN, the corresponding min value will be
@@ -134,14 +137,14 @@ def max(tensor, axis=None, keepdims=False):
         tensor (ndarray): Array to take the maximum.
         axis (int): Along which axis to take the maximum. The flattened array
             is used by default. Defaults to None.
-        dtype: Data type specifier.
         keepdims (bool): If ``True``, the axis is kept as an axis of
         size one. Default to False.
 
     Returns:
         ndarray: The maximum of ``tensor``, along the axis if specified.
     """
-    return np.amax(tensor, axis=axis, keepdims=keepdims)
+
+    return tf.math.reduce_max(tensor, axis=axis, keepdims=keepdims)
 
 
 def min(tensor, axis=None, keepdims=False):
@@ -154,15 +157,14 @@ def min(tensor, axis=None, keepdims=False):
     Args:
         tensor (ndarray): Array to take the maximum.
         axis (int): Along which axis to take the maximum. The flattened array
-            is used by default. Defaults to None.
+                    is used by default. Defaults to None.
         keepdims (bool): If ``True``, the axis is kept as an axis of
         size one. Default to False.
 
     Returns:
         ndarray: The maximum of ``tensor``, along the axis if specified.
     """
-
-    return np.amin(tensor, axis=axis, keepdims=keepdims)
+    return tf.math.reduce_min(tensor, axis=axis, keepdims=keepdims)
 
 
 def sum(tensor, axis=None, keepdims=False):
@@ -174,10 +176,11 @@ def sum(tensor, axis=None, keepdims=False):
         keepdims (bool): If ``True``, the specified axes are remained as axes
         of length one.
 
+
     Returns:
         ndarray: The sum of ``tensor``, along the axis if specified.
     """
-    return np.sum(tensor, axis=axis, keepdims=keepdims)
+    return tf.math.reduce_sum(tensor, axis=axis, keepdims=keepdims)
 
 
 def mean(tensor, axis=None, keepdims=False):
@@ -192,7 +195,7 @@ def mean(tensor, axis=None, keepdims=False):
     Returns:
         ndarray: The mean of ``tensor``, along the axis if specified.
     """
-    return np.mean(tensor, axis=axis, keepdims=keepdims)
+    return tf.math.reduce_mean(tensor, axis=axis, keepdims=keepdims)
 
 
 def sqrt(tensor):
@@ -204,12 +207,10 @@ def sqrt(tensor):
     Returns:
         tensor: square root of the input tensor.
     """
-    return np.sqrt(tensor)
+    return tf.math.sqrt(tensor)
 
 
 # - Manipulation -
-
-
 def assign(dst_tensor, values, slices):
     """ assign values in tensor at the position specified by the slices.
 
@@ -221,8 +222,12 @@ def assign(dst_tensor, values, slices):
         ndarray: tensor with the assigned values.
 
     """
+    # FIXME: its a hack to get it to work, there must be a faster way.
+
+    dst_tensor = as_numpy_array(dst_tensor)
+    values = as_numpy_array(values)
     dst_tensor[slices] = values
-    return dst_tensor
+    return tensor(dst_tensor)
 
 
 def tile(tensor, reps):
@@ -233,7 +238,7 @@ def tile(tensor, reps):
     Returns:
         ndarray: Transformed tensor with repeats.
     """
-    return np.tile(tensor, reps)
+    return tf.tile(tensor, reps)
 
 
 def concatenate(tup, axis=0):
@@ -247,15 +252,13 @@ def concatenate(tup, axis=0):
     Returns:
         ndarray: Joined array.
     """
-    return np.concatenate(tup, axis=axis)
+    return tf.concat(tup, axis=axis)
 
 
 # - Utils -
-
-
 def transpose(a):
     "Transpose the tensor"
-    return np.transpose(a)
+    return tf.transpose(a)
 
 
 def cast(tensor, dtype):
@@ -263,9 +266,12 @@ def cast(tensor, dtype):
 
     Args:
         tensor (Tensor): tensor to cast.
-        dtype (str): type to cast. Usually floatx or intx
+        dtype (str): type to cast. Usually floatx() or intx()
+
+    Returns:
+        ndarray: Tensor casted in the requested format.
     """
-    return tensor.astype(dtype)
+    return tf.cast(tensor, dtype)
 
 
 def dtype(tensor):
@@ -288,31 +294,50 @@ def flatten(tensor):
     Returns:
         ndarray: flattened tensor
     """
-    return tensor.flatten()
+    # note: unsure if that is the fastest way. maybe compute flat_shape in
+    # pure python
+
+    flat_shape = prod(tensor.shape)
+    return tf.reshape(tensor, flat_shape)
 
 
-def as_numpy_array(tensor):
+def as_numpy_array(t):
     """Convert tensor to a numpy array.
 
     Useful when interfacing with other librairies to have a unified input
     to them.
 
     Args:
-        tensor (ndarray): tensor to convert
+        t (ndarray): tensor to convert
     Returns:
         numpy.ndarray: Tensor as numpy array
     """
-    return np.asarray(tensor)
+
+    if not is_tensor(t):
+        dtype = _infer_dtype(t)
+        if isinstance(t, list):
+            t = tensor(t)
+        else:
+            t = tensor([t])
+    else:
+        dtype = t.dtype.name
+
+    return t.numpy().astype(dtype)
 
 
 def reshape(tensor, shape):
     "reshape tensor"
-    return np.reshape(tensor, shape)
+    return tf.reshape(tensor, shape)
 
 
 def is_tensor(a):
     "check if the given object is a tensor"
-    return isinstance(a, np.ndarray)
+    if isinstance(a, tf.Tensor):
+        return True
+    elif isinstance(a, tf.python.framework.tensor_shape.TensorShape):
+        return True
+    else:
+        return False
 
 
 def tensor_equal(tensor1, tensor2):
@@ -326,7 +351,7 @@ def tensor_equal(tensor1, tensor2):
         Bool: True if exactly equal, False otherwise.
 
     """
-    return np.array_equal(tensor1, tensor2)
+    return tf.reduce_all(tf.equal(tensor1, tensor2))
 
 
 def assert_near(a, b, absolute_tolerance=0, relative_tolerance=0):
@@ -348,10 +373,27 @@ def assert_near(a, b, absolute_tolerance=0, relative_tolerance=0):
 
     """
 
-    return np.allclose(a, b, atol=absolute_tolerance, rtol=relative_tolerance)
+    try:
+        tf.debugging.assert_near(a,
+                                 b,
+                                 atol=absolute_tolerance,
+                                 rtol=relative_tolerance)
+    except InvalidArgumentError:
+        return False
+    return True
 
 
 # - Math -
+def _is_scalar(a):
+    if isinstance(a, int):
+        return True
+    elif isinstance(a, float):
+        return True
+    elif is_tensor(a):
+        if a.shape == ():
+            return True
+    else:
+        False
 
 
 def dot(t1, t2):
@@ -364,7 +406,15 @@ def dot(t1, t2):
     Return:
         ndarray: tensor containing the dot product
     """
-    return np.dot(t1, t2)
+
+    # # scalar
+    if (_is_scalar(t1) or _is_scalar(t2)):
+        return t1 * t2
+    #     return tf.reduce_sum(tf.multiply(t1, t2))
+    elif len(t1.shape) == 1 or len(t2.shape) == 1:
+        return tf.reduce_sum(tf.multiply(t1, t2), axis=-1)
+    else:
+        return tf.matmul(t1, t2)
 
 
 def add(tensor1, tensor2):
@@ -374,7 +424,7 @@ def add(tensor1, tensor2):
         tensor1 (ndarray): Left tensor.
         tensor2 (ndarray): right tensor.
     """
-    return np.add(tensor1, tensor2)
+    return tf.add(tensor1, tensor2)
 
 
 def subtract(tensor1, tensor2):
@@ -384,7 +434,7 @@ def subtract(tensor1, tensor2):
         tensor1 (ndarray): Left tensor.
         tensor2 (ndarray): right tensor.
     """
-    return np.subtract(tensor1, tensor2)
+    return tf.subtract(tensor1, tensor2)
 
 
 def multiply(tensor1, tensor2):
@@ -394,7 +444,7 @@ def multiply(tensor1, tensor2):
         tensor1 (ndarray): Left tensor.
         tensor2 (ndarray): right tensor.
     """
-    return np.multiply(tensor1, tensor2)
+    return tf.multiply(tensor1, tensor2)
 
 
 def divide(numerator, denominator):
@@ -404,7 +454,7 @@ def divide(numerator, denominator):
         tensor1 (ndarray): numerator tensor.
         tensor2 (ndarray): denominator tensor.
     """
-    return np.divide(numerator, denominator)
+    return tf.cast(tf.divide(numerator, denominator), floatx())
 
 
 def mod(numerator, denominator):
@@ -414,10 +464,10 @@ def mod(numerator, denominator):
         tensor1 (ndarray): numerator tensor.
         tensor2 (ndarray): denominator tensor.
     """
-    return np.mod(numerator, denominator)
+    return tf.math.mod(numerator, denominator)
 
 
-def clip(tensor, min_val=0, max_val=None):
+def clip(tensor, min_val=0, max_val=None, out=None):
     """Clips the values of a tensor to a given interval. For example,
     if an interval of [0, 1] is specified, values smaller than 0 become 0,
     and values larger than 1 become 1.
@@ -427,29 +477,37 @@ def clip(tensor, min_val=0, max_val=None):
     Args:
         tensor (ndarray): The input Tensor.
 
-        min_val (scalar, ndarray ): The left side of the interval.
-        Defaults to 0.
+        min_val (scalar, ndarray or None): The left side of the interval. When
+        None ignored.  Defaults to None.
 
         max_val (scalar, ndarray or None): The right side of the interval. When
-        None ignored. Defaults to None.
+        None ignored.  Defaults to None.
 
     Returns:
         ndarray: Clipped tensor.
     """
-    return np.clip(tensor, a_min=min_val, a_max=max_val)
+    return tf.clip_by_value(tensor,
+                            clip_value_min=min_val,
+                            clip_value_max=max_val)
 
 
 def abs(tensor):
     "Calculate the absolute value element-wise."
-    return np.absolute(tensor)
+    return tf.math.abs(tensor)
 
 
 def broadcasted_norm(tensor):
     "Norm broadcasted accross dimensions"
-    return np.sum(np.abs(tensor)**2, axis=-1)**0.5
+    norm = cast(tf.abs(tensor), intx())
+    norm = norm**2
+    norm = tf.reduce_sum(norm, axis=-1)
+    norm = sqrt(cast(norm, floatx()))
+    return norm
+
+    # population_norm = B.sum(B.abs(flat_pop)**2, axis=-1)**0.5
 
 
-def norm(tensor, ord=None, axis=None, keepdims=False):
+def norm(tensor, ord='euclidean', axis=None, keepdims=False):
     """Return one of eight different matrix norms, or one of an infinite
     number of vector norms (described below), depending on the value of
     the `ord` parameter.
@@ -458,8 +516,9 @@ def norm(tensor, ord=None, axis=None, keepdims=False):
         tensor (ndarray): Array to take the norm from. If ``axis`` is None,
         the ``tensor`` must be 1D or 2D.
 
-        ord (non-zero int, inf, -inf, 'fro'): Norm type.
-        See `numpy.linalg.norm` for explanation.
+        ord (non-zero int, inf, -inf, 'fro'): Norm type. Euclidian by default.
+        See `tf.norm` for explanation:
+        https://www.tensorflow.org/api_docs/python/tf/norm
 
         axis (int, 2-tuple of ints, None): `axis` along which the norm is
         computed.
@@ -470,13 +529,13 @@ def norm(tensor, ord=None, axis=None, keepdims=False):
     Returns:
         ndarray: Norm of the tensor.
     """
-    return np.linalg.norm(tensor, ord=ord, axis=axis, keepdims=keepdims)
+    return tf.norm(tensor, ord=ord, axis=axis, keepdims=keepdims)
 
 
 # - Randomness -
 
 
-def randint(low, high=None, shape=None, dtype='l'):
+def randint(low, high=None, shape=None, dtype=intx()):
     """Returns a scalar or an array of integer values over [low, high)
 
     Args:
@@ -489,53 +548,61 @@ def randint(low, high=None, shape=None, dtype='l'):
         shape (None or int or tuple of ints, optional): The shape of returned
         value. Defaults to None.
 
-        dtype (str, optional): dtype: Data type specifier. Defaults to 'l'.
+        dtype (str, optional): dtype: Data type specifier.
+        Defaults to 'float32'.
 
     Returns:
         int or ndarray of ints: If size is None, it is single integer
         sampled. If size is integer, it is the 1D-array of length size
         element. Otherwise, it is the array whose shape specified by size.
     """
-    return np.random.randint(low, high=high, size=shape, dtype=dtype)
+    if isinstance(shape, int):
+        shape = (shape, )
+    return tf.random.uniform(shape=shape, minval=low, maxval=high, dtype=dtype)
 
 
-def shuffle(tensor, axis=0):
-    """Shuffle a tensor along a given axis. Other axis remain
-    in place.
-
+def shuffle(t, axis=0):
+    """Shuffle tensor along the given axis. Other axis remain in
+    place.
 
     Args:
         tensor (ndarray): tensor to shuffle.
         axis (int, optional): axis to shuffle on. Default to 0.
 
     Returns:
-        tensor: shuffled tensor
+        None: in place shuffling
     """
+    if not axis:
+        # ! tensorflow don't do in place shuffling
+        return tf.random.shuffle(t)
+    else:
+        # FIXME: its a hack as we use numpy which is liklely to cause slowness
+        t = as_numpy_array(t)
+        rng = numpy.random.default_rng()
+        rng.shuffle(t, axis=axis)
+        return tensor(t)
 
-    # ! we must return the tensor because other backend don't do shuffle
-    # ! in place.
-    # FIXME move the rng to a global one to avoid allocation
-    rng = np.random.default_rng()
-    rng.shuffle(tensor, axis=axis)
-    return tensor
 
-
-def full_shuffle(tensor):
-    """Shuffle a tensor along all of its axis
+def full_shuffle(t):
+    """Shuffle in place a tensor along all of its axis
 
     Args:
-        tensor (ndarray): tensor to shuffle.
+        t (ndarray): tensor to shuffle.
+
 
     Returns:
-        Tensor:shuffled tensor
+        None: in place shuffling
 
     """
-    # ! we must return the tensor because other backend don't do shuffle
-    # ! in place.
-    rng = np.random.default_rng()
-    for idx in range(len(tensor.shape)):
-        rng.shuffle(tensor, axis=idx)
-    return tensor
+    # ! dont use the variable name tensor as it confusion with the tensor()
+    # ! function
+
+    # FIXME: its a hack as we use numpy which is liklely to cause slowness
+    t = as_numpy_array(t)
+    rng = numpy.random.default_rng()
+    for idx in range(len(t.shape)):
+        rng.shuffle(t, axis=idx)
+    return tensor(t)
 
 
 # - Indexing -
@@ -553,35 +620,26 @@ def take(tensor, indices, axis=None):
         axis (int, optional): The axis along which to select indices from.
         The flattened input is used by default. Defaults to None.
 
-        out (ndarray. Optional): Output array. If provided, it should be of
-            appropriate shape and dtype. Defaults to None.
     Returns:
         ndarray: Tensor containing the values from the specified indices.
     """
-    return np.take(tensor, indices, axis=axis)
+    return tf.gather(tensor, indices, axis=axis)
 
 
-def top_k_indices(tensor, k):
+def top_k_indices(tensor, k, axis=-1):
     """
     Finds the indices of the k largest entries alongside an axis.
 
     Args:
         tensor (ndarray): Tensor with a last dimension of at least k size.
 
-        k (i): number of elements to return.
+        k (i): number of elements to return
 
     """
-    k = -k  # reverse to get top elements
-
-    # we do partition and then sort to maximizes speed and have an avg
-    # complexity of O(k log k).
-    idxs = np.argpartition(tensor, k)[k:]
-
-    # ! mind the - argsort return in increasing order we want largest
-    return idxs[np.argsort(-tensor[idxs])]
+    return tf.math.top_k(tensor, k)[1]
 
 
-def bottom_k_indices(tensor, k):
+def bottom_k_indices(tensor, k, axis=-1):
     """
     Finds the indices of the k smallest entries alongside an axis.
 
@@ -589,15 +647,20 @@ def bottom_k_indices(tensor, k):
         tensor (ndarray): Tensor with a last dimension of at least k size.
 
         k (i): number of elements to return.
+
+        axis (int or None) - Axis along which to sort. Default is -1,
+        which is the last axis. If None is supplied,
+        the array will be flattened before sorting.
+
     """
-    idxs = np.argpartition(tensor, k)[:k]
-    return idxs[np.argsort(tensor[idxs])]
+    # inverted top k and reinverted before returning
+    return tf.math.top_k(tf.multiply(tensor, -1), k)[1]
 
 
 # - Statistical -
 
 
-def bincount(tensor, weights=None, minlength=0):
+def bincount(tensor, weights=None, minlength=None):
     """Count number of occurrences of each value in array of non-negative ints.
 
     Args:
@@ -608,9 +671,5 @@ def bincount(tensor, weights=None, minlength=0):
 
         minlength (int): A minimum number of bins for the output array.
 
-    Returns:
-        ndarray: The result of binning the input tensor. The length of
-        output is equal to ``max(max(x) + 1, minlength)``.
-
     """
-    return np.bincount(tensor, weights=weights, minlength=minlength)
+    return tf.math.bincount(tensor, weights=weights, minlength=minlength)
