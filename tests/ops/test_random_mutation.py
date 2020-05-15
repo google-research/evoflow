@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from geneflow.ops import RandomMutations1D, RandomMutations2D
-from geneflow.ops import RandomMutations3D
-from geneflow import backend as B
+from evoflow.ops import RandomMutations1D, RandomMutations2D
+from evoflow.ops import RandomMutations3D
+from evoflow import backend as B
 from copy import copy
 from termcolor import cprint
 

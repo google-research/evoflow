@@ -28,12 +28,12 @@ def set_floatx(value):
         value (str): `'float16'`, `'float32'`, or `'float64'`.
 
     Example:
-    >>> geneflow.backend.floatx()
+    >>> evoflow.backend.floatx()
     'float32'
-    >>> geneflow.backend.set_floatx('float64')
-    >>> geneflow.backend.floatx()
+    >>> evoflow.backend.set_floatx('float64')
+    >>> evoflow.backend.floatx()
     'float64'
-    >>> geneflow.backend.set_floatx('float32')
+    >>> evoflow.backend.set_floatx('float32')
     Raises:
         ValueError: In case of invalid value.
     """
@@ -66,12 +66,12 @@ def set_intx(value):
         One of `{'int8', 'uint8', 'int16', 'uint16', 'int32', 'int64'}`
 
     Example:
-    >>> geneflow.backend.intx()
+    >>> evoflow.backend.intx()
     'int32'
-    >>> geneflow.set_intx('uint8')
-    >>> geneflow.backend.intx()
+    >>> evoflow.set_intx('uint8')
+    >>> evoflow.backend.intx()
     'uint8'
-    >>> geneflow.intx('float132')
+    >>> evoflow.intx('float132')
     Raises:
         ValueError: In case of invalid value.
     """

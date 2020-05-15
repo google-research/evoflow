@@ -1,5 +1,5 @@
-from geneflow.population import genRandIntPopulation
-import geneflow.backend as B
+from evoflow.population import genRandIntPopulation
+import evoflow.backend as B
 
 
 def test_randintpop():

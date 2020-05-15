@@ -17,9 +17,9 @@ from collections import defaultdict
 import plotly.graph_objects as go
 from tabulate import tabulate
 
-import geneflow.backend as B
-from geneflow.utils import unbox
-from geneflow.io import print_debug
+import evoflow.backend as B
+from evoflow.utils import unbox
+from evoflow.io import print_debug
 
 
 class Results(object):

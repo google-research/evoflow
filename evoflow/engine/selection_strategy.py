@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import abc
-from geneflow.io import print_debug
+from evoflow.io import print_debug
 
 
 class SelectionStrategy(object):
@@ -21,7 +21,6 @@ class SelectionStrategy(object):
     To be implemented by subclasses:
     * `call()`: Contains the logic for selecting which chromesome to keep.
     """
-
     def __init__(self, name, **kwargs):
         self.name = name
         self.debug = kwargs.get('debug', False)

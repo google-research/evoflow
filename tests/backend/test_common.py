@@ -1,4 +1,4 @@
-from geneflow.backend import set_floatx, floatx, set_intx, intx
+from evoflow.backend import set_floatx, floatx, set_intx, intx
 
 
 def test_set_floatx():

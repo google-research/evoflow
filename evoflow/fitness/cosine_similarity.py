@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import geneflow.backend as B
-from geneflow.engine import FitnessFunction
+import evoflow.backend as B
+from evoflow.engine import FitnessFunction
 
 
 class InvertedCosineSimilarity(FitnessFunction):

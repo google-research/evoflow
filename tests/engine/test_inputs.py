@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from geneflow.ops import Input
-from geneflow import backend as B
+from evoflow.ops import Input
+from evoflow import backend as B
 
 
 def test_call_vs_get():

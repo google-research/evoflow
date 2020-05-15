@@ -13,8 +13,8 @@
 # limitations under the License.
 
 from termcolor import cprint
-from geneflow.engine import OP
-from geneflow import backend as B
+from evoflow.engine import OP
+from evoflow import backend as B
 
 
 class UniformCrossover(OP):

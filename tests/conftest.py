@@ -32,7 +32,7 @@ else:
 def pytest_configure(config):
     backend = config.option.backend
     if backend:
-        from geneflow.config import set_backend
+        from evoflow.config import set_backend
         set_backend(backend)
         cprint('Requested backend: %s' % backend, 'magenta')
     else:
@@ -51,24 +51,24 @@ def backends():
     # ! only use this for backend testing. Higher level function import the
     # ! backend so it will create type conflict.
     """
-    import geneflow.backend.numpy as NP
+    import evoflow.backend.numpy as NP
 
     try:
         import cupy as cp  # noqa
         logger.info('cupy found')
     except:  # noqa
-        import geneflow.backend.numpy as CP
+        import evoflow.backend.numpy as CP
         logger.info('cupy not found - using numpy instead')
     else:
-        import geneflow.backend.cupy as CP
+        import evoflow.backend.cupy as CP
 
     try:
         import tensorflow  # noqa
         logger.info('TensorFlow found')
     except:  # noqa
-        import geneflow.backend.numpy as TF
+        import evoflow.backend.numpy as TF
         logger.info('TensorFlow not found - using numpy instead')
     else:
-        import geneflow.backend.tensorflow as TF
+        import evoflow.backend.tensorflow as TF
 
     return [NP, CP, TF]

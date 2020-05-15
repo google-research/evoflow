@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import geneflow.backend as B
+import evoflow.backend as B
 from copy import copy
-from geneflow.ops import UniformCrossover1D, UniformCrossover2D
-from geneflow.ops import UniformCrossover3D
+from evoflow.ops import UniformCrossover1D, UniformCrossover2D
+from evoflow.ops import UniformCrossover3D
 
 
 def test_uniform_2Dcrossover_randomness_shape():

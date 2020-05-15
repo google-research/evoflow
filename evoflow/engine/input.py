@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from .op import OP
-import geneflow.backend as B
+import evoflow.backend as B
 
 
 class Input(OP):

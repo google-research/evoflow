@@ -1,8 +1,8 @@
-from geneflow.engine import GeneFlow
-from geneflow.ops import Input, RandomMutations2D, UniformCrossover2D
-from geneflow.selection import SelectFittest
-from geneflow.fitness import Sum
-import geneflow.backend as B
+from evoflow.engine import EvoFlow
+from evoflow.ops import Input, RandomMutations2D, UniformCrossover2D
+from evoflow.selection import SelectFittest
+from evoflow.fitness import Sum
+import evoflow.backend as B
 
 
 def test_direct_2d():
@@ -16,10 +16,10 @@ def test_direct_2d():
     inputs = Input(shape=SHAPE)
     x = RandomMutations2D(max_gene_value=1, min_gene_value=0)(inputs)
     outputs = UniformCrossover2D()(x)
-    gf = GeneFlow(inputs, outputs)
+    ef = EvoFlow(inputs, outputs)
 
     fitness_function = Sum(max_sum_value=GENE_SIZE)
     evolution_strategy = SelectFittest()
 
-    gf.compile(evolution_strategy, fitness_function)
-    gf.evolve(population, num_evolutions=NUM_EVOLUTIONS)
+    ef.compile(evolution_strategy, fitness_function)
+    ef.evolve(population, num_evolutions=NUM_EVOLUTIONS)

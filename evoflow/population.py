@@ -1,4 +1,4 @@
-import geneflow.backend as B
+import evoflow.backend as B
 
 
 def genRandIntPopulation(shape, max_value, min_value=0):

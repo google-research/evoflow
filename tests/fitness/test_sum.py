@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from geneflow.fitness import Sum
-import geneflow.backend as B
+from evoflow.fitness import Sum
+import evoflow.backend as B
 
 
 def test_sum2d():

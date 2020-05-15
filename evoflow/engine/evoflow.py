@@ -18,12 +18,12 @@ from tabulate import tabulate
 from collections import defaultdict
 from tqdm.auto import tqdm
 
-from geneflow.utils import box
-from geneflow.io import print_debug
+from evoflow.utils import box
+from evoflow.io import print_debug
 from .results import Results
 
 
-class GeneFlow(object):
+class EvoFlow(object):
     def __init__(self, inputs, outputs, debug=False):
 
         if not inputs:

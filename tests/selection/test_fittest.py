@@ -13,9 +13,9 @@
 # limitations under the License.
 
 import numpy as np
-import geneflow.backend as B
-from geneflow.selection import SelectFittest
-from geneflow.fitness import InvertedCosineSimilarity
+import evoflow.backend as B
+from evoflow.selection import SelectFittest
+from evoflow.fitness import InvertedCosineSimilarity
 
 
 def test_fittest():

@@ -16,7 +16,7 @@ import tensorflow as tf
 from tensorflow.errors import InvalidArgumentError
 
 from .common import _infer_dtype
-from geneflow.config import intx, floatx
+from evoflow.config import intx, floatx
 import numpy
 
 

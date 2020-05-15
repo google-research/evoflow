@@ -1,4 +1,4 @@
-from geneflow.config import floatx, intx
+from evoflow.config import floatx, intx
 
 
 def _infer_dtype(a):

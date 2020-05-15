@@ -15,4 +15,4 @@
 from .op import OP  # noqa: F401
 from .selection_strategy import SelectionStrategy  # noqa: F401
 from .fitness_function import FitnessFunction  # noqa: F401
-from .geneflow import GeneFlow  # noqa: F401
+from .evoflow import EvoFlow  # noqa: F401

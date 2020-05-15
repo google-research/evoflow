@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from geneflow.utils import box, unbox
-from geneflow.backend import tensor
-from geneflow.backend import tensor_equal
+from evoflow.utils import box, unbox
+from evoflow.backend import tensor
+from evoflow.backend import tensor_equal
 
 
 def test_box_unbox():

@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import geneflow.backend as B
-from geneflow.ops import Dummy, Input
+import evoflow.backend as B
+from evoflow.ops import Dummy, Input
 
 
 def test_eager():

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from geneflow import io
+from evoflow import io
 
 
 def test_print_debug_multi_msg():

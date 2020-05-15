@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from geneflow.engine import GeneFlow
-import geneflow.backend as B
-from geneflow.ops import Input, RandomMutations1D, UniformCrossover1D
-from geneflow.selection import SelectFittest
-from geneflow.fitness import Sum
-from geneflow.population import genRandIntPopulation
+from evoflow.engine import EvoFlow
+import evoflow.backend as B
+from evoflow.ops import Input, RandomMutations1D, UniformCrossover1D
+from evoflow.selection import SelectFittest
+from evoflow.fitness import Sum
+from evoflow.population import genRandIntPopulation
 
 
 def test_helloworld():
@@ -31,7 +31,7 @@ def test_helloworld():
     inputs = Input(SHAPE)
     x = RandomMutations1D(max_gene_value=1)(inputs)
     outputs = UniformCrossover1D()(x)
-    gf = GeneFlow(inputs, outputs, debug=0)
+    gf = EvoFlow(inputs, outputs, debug=0)
     fitness_function = Sum(max_sum_value=SHAPE[1])
     evolution_strategy = SelectFittest()
     gf.compile(evolution_strategy, fitness_function)

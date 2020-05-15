@@ -19,14 +19,14 @@ from setuptools import find_packages
 long_description = open("README.md").read()
 version = '0.3.%s' % int(time())
 
-setup(name='geneflow',
+setup(name='evoflow',
       version=version,
-      description='Genetic Algorithm for humans',
+      description='Genetic Algorithms for humans',
       long_description=long_description,
       long_description_content_type="text/markdown",
       author='Elie Bursztein',
-      author_email='elieb@google.com',
-      url='https://github.com/google/geneflow',
+      author_email='evoflow@google.com',
+      url='https://github.com/google/evoflow',
       license='Apache 2',
       python_requires='>=3',
       package_data={"": ["*.json"]},

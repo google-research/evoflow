@@ -1,5 +1,17 @@
-# GeneFlow - Evolutionary algorithms for humans
-![Build Status](https://github.com/google-research/geneflow/workflows/Python%20package/badge.svg)
+# EvoFlow - Evolutionary algorithms for humans
+![TensorFlow](https://github.com/google-research/evoflow/workflows/TensorFlow/badge.svg) ![Numpy](https://github.com/google-research/evoflow/workflows/Numpy/badge.svg)
+
+
+## Install
+
+`pip install evoflow`
+
+## Deep-learning versus Evoluationary algorithms
+
+Generally you want to use Deep-learning when the problem is continious/smooth
+and evoluationary algorithms when the problem is discrete. For example voice
+generation is smooth and solving (non-linear) equations is discrete.
+
 
 ## Terminology
 
@@ -14,7 +26,7 @@ maximizes multiples fitness function at once.
   this is equivalent to the loss function in deep learning except it doesn't
 need to be differentiable and aim to be maximized.
 
-### GeneFlow Terminology
+### EvoFlow Terminology
 
 - **evoluationary op**: Operation performed on a population of chromosome to
 make them evolve. Common ops includes various type of Chromosomal crossovers
@@ -23,12 +35,6 @@ and Chromosomal mutations. Equivalent to deep-learning layers
 
 - **evoluationary model**: Directed graph of evolutionary ops used to evolve
 the population. Equivalent to a model architecture in deep-learning settings.
-
-## Deep-learning versus Evoluationary algorithms
-
-Generally you want to use Deep-learning when the problem is continious/smooth
-and evoluationary algorithms when the problem is discrete. For example voice
-generation is smooth and solving (non-linear) equations is discrete.
 
 ## Disclaimer
 

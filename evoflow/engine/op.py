@@ -16,9 +16,9 @@ import abc
 import random
 import hashlib
 from time import time
-from geneflow.utils import box, unbox
-from geneflow.io import print_debug
-from geneflow import backend as B
+from evoflow.utils import box, unbox
+from evoflow.io import print_debug
+from evoflow import backend as B
 
 
 class OP(object):

@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from geneflow.fitness import InvertedCosineSimilarity
-import geneflow.backend as B
+from evoflow.fitness import InvertedCosineSimilarity
+import evoflow.backend as B
 
 
 def test_cosine_similarity_1dpopulation(backends):

@@ -8,13 +8,13 @@ Adding a backend ops requires you to:
 your responsibility to unify API accross the various underlying frameworks. As
 a rule of thumb avoid exposing unecessary options or using positional argument
 when not needed. This is done by adding code
-to `geneflow/backend/[framework].py`
+to `evoflow/backend/[framework].py`
 
 *Note*: Backend files are organized by ops category so make sure to put your op
 in the correct place.
 
 2. Add your function prototype to the backend loader so it is loaded by the
-modules. This is done by adding it to `geneflow/backend/__init__.py`. Make sure
+modules. This is done by adding it to `evoflow/backend/__init__.py`. Make sure
 to add it at the same position than it is in the backend code.
 
 3. Add at least one unit test in `tests/backend/test_[op catregory].py`. Make

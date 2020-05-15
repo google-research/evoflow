@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from geneflow.engine.op import OP
+from evoflow.engine.op import OP
 
 
 class Dummy(OP):

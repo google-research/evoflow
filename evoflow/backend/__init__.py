@@ -15,10 +15,10 @@
 # - shared function --
 # ! Dont import loader related funciton here - will break everything
 # ! instead if needed (like set_backend()) put then in root __init__.py
-from geneflow.config import floatx  # noqa: F401
-from geneflow.config import set_floatx  # noqa: F401
-from geneflow.config import intx  # noqa: F401
-from geneflow.config import set_intx  # noqa: F401
+from evoflow.config import floatx  # noqa: F401
+from evoflow.config import set_floatx  # noqa: F401
+from evoflow.config import intx  # noqa: F401
+from evoflow.config import set_intx  # noqa: F401
 
 # -initialization-
 from .load_backend import tensor  # noqa: F401

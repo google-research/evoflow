@@ -13,12 +13,12 @@
 # limitations under the License.
 
 # import os
-# os.environ['GENEFLOW_BACKEND'] = 'numpy'
+# os.environ['evoflow_BACKEND'] = 'numpy'
 from termcolor import cprint
 from copy import copy
-from geneflow import backend as B
-from geneflow.ops import DualCrossover1D, DualCrossover2D
-from geneflow.ops import DualCrossover3D
+from evoflow import backend as B
+from evoflow.ops import DualCrossover1D, DualCrossover2D
+from evoflow.ops import DualCrossover3D
 
 
 def test_ND():

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from geneflow.backend.common import floatx, intx
+from evoflow.backend.common import floatx, intx
 
 
 def test_to_numpy(backends):

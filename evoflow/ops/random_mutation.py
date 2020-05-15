@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from geneflow.engine import OP
-from geneflow import backend as B
+from evoflow.engine import OP
+from evoflow import backend as B
 from termcolor import cprint
 
 

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from termcolor import cprint
-from geneflow.backend.common import intx
+from evoflow.backend.common import intx
 
 
 def test_take(backends):
