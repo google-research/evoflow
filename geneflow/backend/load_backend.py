@@ -14,7 +14,7 @@
 
 import os
 import sys
-from .common import _BACKEND, set_backend, get_backend
+from geneflow.config import set_backend, get_backend
 
 # override existing setting to allow reload
 if 'GENEFLOW_BACKEND' in os.environ:

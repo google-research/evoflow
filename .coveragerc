@@ -1,4 +1,0 @@
-[run]
-omit =
-    # no gpu available in test instances
-    backend/cupy.py

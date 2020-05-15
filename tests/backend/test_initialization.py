@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from geneflow.backend.common import floatx, set_floatx, intx, set_intx
+from geneflow.config import floatx, set_floatx, intx, set_intx
 
 
 def test_tensor(backends):

@@ -31,7 +31,7 @@ setup(name='geneflow',
       package_data={"": ["*.json"]},
       install_requires=[
           'networkx', 'numpy', 'tqdm', 'tabulate', 'termcolor', 'matplotlib',
-          'plotly', 'pandas'
+          'plotly', 'tensorflow'
       ],
       classifiers=[
           'Development Status :: 5 - Production/Stable',

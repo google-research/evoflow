@@ -1,4 +1,4 @@
-from geneflow import GeneFlow
+from geneflow.engine import GeneFlow
 from geneflow.ops import Input, RandomMutations2D, UniformCrossover2D
 from geneflow.selection import SelectFittest
 from geneflow.fitness import Sum

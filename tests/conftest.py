@@ -13,15 +13,35 @@
 # limitations under the License.
 
 import pytest
+from termcolor import cprint
+# logging
 import logging
+logger = logging.getLogger()
 
 # need to be done as early as possible
 try:
     import tensorflow as tf
 except:  # noqa
+    cprint('Tensoflow not found', 'yellow')
     pass
 else:
     tf.config.set_visible_devices([], 'GPU')
+    cprint('Tensoflow set to CPU', 'green')
+
+
+def pytest_configure(config):
+    backend = config.option.backend
+    if backend:
+        from geneflow.config import set_backend
+        set_backend(backend)
+        cprint('Requested backend: %s' % backend, 'magenta')
+    else:
+        cprint("Requested backend: default (tensorflow)", 'magenta')
+
+
+def pytest_addoption(parser):
+    parser.addoption("--backend",
+                     help="specify the backend: numpy, cupy, tensorflow")
 
 
 @pytest.fixture(scope="session")
@@ -32,7 +52,6 @@ def backends():
     # ! backend so it will create type conflict.
     """
     import geneflow.backend.numpy as NP
-    logger = logging.getLogger()
 
     try:
         import cupy as cp  # noqa
@@ -44,10 +63,7 @@ def backends():
         import geneflow.backend.cupy as CP
 
     try:
-        import tensorflow as tf
-
-        # forcing CPU only otherwise tests are flaky
-
+        import tensorflow  # noqa
         logger.info('TensorFlow found')
     except:  # noqa
         import geneflow.backend.numpy as TF

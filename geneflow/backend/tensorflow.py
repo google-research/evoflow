@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from termcolor import cprint
 import tensorflow as tf
 from tensorflow.errors import InvalidArgumentError
 
-from .common import _infer_dtype, intx, floatx
+from .common import _infer_dtype
+from geneflow.config import intx, floatx
 import numpy
 
 

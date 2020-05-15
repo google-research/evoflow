@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from geneflow import GeneFlow
+from geneflow.engine import GeneFlow
 import geneflow.backend as B
 from geneflow.ops import Input, RandomMutations1D, UniformCrossover1D
 from geneflow.selection import SelectFittest

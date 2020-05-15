@@ -34,6 +34,10 @@ def tensor(a, dtype=None):
     if is_tensor(a):
         return a
 
+    # cupy dont' support tuple
+    if isinstance(a, tuple):
+        a = list(a)
+
     if not dtype and not isinstance(a, numpy.ndarray):
         # automatic inference based of floatx and intx settings
         dtype = _infer_dtype(a)
@@ -278,6 +282,15 @@ def cast(tensor, dtype):
         tensor (Tensor): tensor to cast.
         dtype (str): type to cast. Usually floatx or intx
     """
+
+    if isinstance(tensor, float) or isinstance(tensor, int):
+        if dtype in ['float', 'float32']:
+            return float(tensor)
+        elif dtype == ['int', 'int32']:
+            return int(tensor)
+        else:
+            raise ValueError("can't cast scalar", type(tensor), "to dype",
+                             dtype)
     return tensor.astype(dtype)
 
 
