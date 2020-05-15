@@ -42,18 +42,22 @@ def test_helloworld():
     metrics = results.get_metrics_history()
 
     # check metrics
-    for metric_name, vals in metrics.items():
-        assert isinstance(vals, list)
-        assert len(vals) == 10
-        assert isinstance(vals[9], float)
+    for metric_grp, data in metrics.items():
 
-    assert 'fitness_mean' in metrics
-    assert 'fitness_max' in metrics
+        for metric_name, vals in data.items():
+            assert isinstance(vals, list)
+            if metric_grp == 'Fitness function':
+                assert len(vals) == 10
+                assert isinstance(vals[9], float)
+
+                assert 'mean' in data
+                assert 'max' in data
 
     # assert the engine solved the (Trivial) problem
-    assert max(metrics['fitness_max']) == 1
-    assert metrics['fitness_max'][9] == 1
-    assert min(metrics['fitness_max']) < 1  # max sure we did improve
+    max_fitness = metrics['Fitness function']['max']
+    assert max(max_fitness) == 1
+    assert max_fitness[9] == 1
+    assert min(max_fitness) < 1  # max sure we did improve
 
     # check population value
     population = results.get_populations()

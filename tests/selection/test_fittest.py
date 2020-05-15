@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import numpy as np
 import geneflow.backend as B
 from geneflow.selection import SelectFittest
 from geneflow.fitness import InvertedCosineSimilarity
@@ -25,7 +26,8 @@ def test_fittest():
 
     fitness_function = InvertedCosineSimilarity(ref)
     selector = SelectFittest()
-    selected_pop, fitness_scores = selector(fitness_function, pop, pop)
+    selected_pop, fitness_scores, metrics = selector(fitness_function, pop,
+                                                     pop)
     print(selected_pop)
     assert selected_pop.shape == pop.shape
     for chromosome in selected_pop:
@@ -36,15 +38,21 @@ def test_fittest_2d():
 
     INSERTION_POINTS = [0, 10, 20]  # where we copy the ref chromosome
 
-    ref_chromosome = B.randint(0, 2, (32, 32))
-    pop1 = B.randint(0, 2, (64, 32, 32))
-    pop2 = B.randint(0, 2, (64, 32, 32))
+    # using numpy as fancy indexing in TF is a pain and perf is not critical.
+    ref_chromosome = np.random.randint(0, 2, (32, 32))
+    pop1 = np.random.randint(0, 2, (64, 32, 32))
+    pop2 = np.random.randint(0, 2, (64, 32, 32))
     for idx in INSERTION_POINTS:
         pop1[idx] = ref_chromosome
 
+    ref_chromosome = B.tensor(ref_chromosome)
+    pop1 = B.tensor(pop1)
+    pop2 = B.tensor(pop2)
+
     fitness_function = InvertedCosineSimilarity(ref_chromosome)
     selector = SelectFittest()
-    selected_pop, fitness_scores = selector(fitness_function, pop1, pop2)
+    selected_pop, fitness_scores, metrics = selector(fitness_function, pop1,
+                                                     pop2)
     print(selected_pop)
     assert selected_pop.shape == pop1.shape
     # check the exact chromosome is the three top choice
