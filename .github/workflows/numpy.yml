@@ -35,4 +35,4 @@ jobs:
     
     - name: Test with pytest
       run: |
-        pytest --backend numpy --cov=geneflow tests/ 
+        pytest --backend numpy --cov=evoflow tests/ 
