@@ -106,7 +106,7 @@ class Results(object):
 
             fig.update_layout(
                 title=group_name,
-                xaxis_title='Generation',
+                xaxis_title='generations',
             )
             fig.show()
 

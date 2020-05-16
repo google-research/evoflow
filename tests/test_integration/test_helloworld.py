@@ -36,7 +36,7 @@ def test_helloworld():
     evolution_strategy = SelectFittest()
     gf.compile(evolution_strategy, fitness_function)
     gf.summary()
-    results = gf.evolve(population, num_evolutions=NUM_EVOLUTIONS)
+    results = gf.evolve(population, generations=NUM_EVOLUTIONS)
     assert results
 
     metrics = results.get_metrics_history()

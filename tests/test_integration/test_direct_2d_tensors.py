@@ -22,4 +22,4 @@ def test_direct_2d():
     evolution_strategy = SelectFittest()
 
     ef.compile(evolution_strategy, fitness_function)
-    ef.evolve(population, num_evolutions=NUM_EVOLUTIONS)
+    ef.evolve(population, generations=NUM_EVOLUTIONS)

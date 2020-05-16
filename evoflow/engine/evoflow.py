@@ -87,7 +87,7 @@ class EvoFlow(object):
     def history(self):
         return self._history
 
-    def evolve(self, populations, num_evolutions=1):
+    def evolve(self, populations, generations=1):
 
         if not self.compiled:
             raise ValueError("compile() must be run before using the graph")
@@ -107,8 +107,8 @@ class EvoFlow(object):
         num_populations = len(current_populations)
 
         # main loop
-        pb = tqdm(total=num_evolutions)
-        for evolution_idx in range(num_evolutions):
+        pb = tqdm(total=generations)
+        for evolution_idx in range(generations):
             evolved_populations = self.perform_evolution()
             # assign evolved population
 
@@ -136,7 +136,12 @@ class EvoFlow(object):
 
             self._results.record_fitness(fitness_scores_list)
 
-            pb.set_postfix(self._results.get_latest_metrics(flatten=True))
+            latest_metrics = self._results.get_latest_metrics(flatten=True)
+            formatted_metrics = {}
+            for name, value in latest_metrics.items():
+                name = name.lower().replace(' ', '_')
+                formatted_metrics[name] = value
+            pb.set_postfix(formatted_metrics)
             pb.update()
 
         pb.close()
