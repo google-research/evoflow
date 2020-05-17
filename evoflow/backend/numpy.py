@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import numpy as np
-from .common import _infer_dtype
+from .common import _infer_dtype, intx, floatx
 
 
 # -initialization-
@@ -53,7 +53,7 @@ def copy(tensor):
     return np.copy(tensor)
 
 
-def zeros(shape, dtype=float):
+def zeros(shape, dtype=floatx()):
     """Returns a new Tensor of given shape and dtype, filled with zeros.
     Args:
         shape (int or tuple of ints): Dimensionalities of the array.
@@ -66,7 +66,7 @@ def zeros(shape, dtype=float):
     return np.zeros(shape, dtype=dtype)
 
 
-def ones(shape, dtype=float):
+def ones(shape, dtype=floatx()):
     """Returns a new Tensor of given shape and dtype, filled with ones.
     Args:
         shape (int or tuple of ints): Dimensionalities of the array.
@@ -107,6 +107,23 @@ def normal(shape, mean=0.0, stddev=1.0):
 
     """
     return np.random.normal(loc=mean, scale=stddev, size=shape)
+
+
+def range(start, stop=None, step=1, dtype=intx()):
+    """Creates a sequence of numbers.
+    Creates a sequence of numbers that begins at `start` and extends by
+    increments of `delta` up to but not including `stop`.
+
+    Args:
+        start (int): Initial value. Optional. Defaults to 0
+        stop (int, optional): End value.
+        delta (int, optional): Spacing between values.  Defaults to 1.
+        dtype (str, optional): Tensor tyoe. Defaults to intx().
+
+    Returns:
+        Tensor: Tensor that contains the requested range.
+    """
+    return np.arange(start, stop=stop, step=step, dtype=dtype)
 
 
 # - Reduce -
@@ -518,9 +535,9 @@ def randint(low, high=None, shape=None, dtype='l'):
     """Returns a scalar or an array of integer values over [low, high)
 
     Args:
-        low (int): If high is not None, it is the lower bound of the
-        interval. Otherwise, it is the upper bound of the interval and
-        lower bound of the interval is set to 0.
+        low (int): If high is None, it is the upper bound of the
+        interval and the lower bound is set to 0. if high is set, it is the
+        lower bound of the interval.
 
         high (int, optional):Upper bound of the interval. Defaults to None.
 
@@ -630,6 +647,21 @@ def bottom_k_indices(tensor, k):
     """
     idxs = np.argpartition(tensor, k)[:k]
     return idxs[np.argsort(tensor[idxs])]
+
+
+def unique_with_counts(tensor):
+    """Finds unique elements and return them along side their position and
+    counts.
+
+    Args:
+        tensor (Tensor): 1D tensor to analyze.
+
+    Returns:
+        values (Tensor): unique values founded
+        indexes (Tensor): index of the value sorted
+        counts (Tensor): Tensor containing the count for each value.
+    """
+    return np.unique(tensor, return_index=True, return_counts=True)
 
 
 # - Statistical -

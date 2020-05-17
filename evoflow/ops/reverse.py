@@ -18,15 +18,16 @@ from evoflow import backend as B
 
 
 class Reverse(OP):
-    def __init__(self, population_fraction, reverse_probability, **kwargs):
+    def __init__(self, population_fraction, max_reverse_probability, **kwargs):
         """Reverse part of the genes.
 
         Args:
             population_fraction (float): How many chromosomes
             should have some of their genes reversed.
 
-            reverse_probability (list(float)): What fraction of the
-            gene should be affected by the reverse.
+            max_reverse_probability (list(float)): What is the maximum fraction
+            of the chromosome that should be affected by the reverse. Number is
+            drawon from [0, max_reverse_probability]
 
             debug (bool, optional): print debug information and function
             returns additional data.
@@ -41,13 +42,13 @@ class Reverse(OP):
         if not (0 < population_fraction <= 1.0):
             raise ValueError("population_fraction must be in (0. 1]")
 
-        for val in reverse_probability:
+        for val in max_reverse_probability:
             if not (0 < val <= 1.0):
                 raise ValueError(
-                    "reverse_probability values must be between (0. 1]")
+                    "max_reverse_probability values must be between (0. 1]")
 
         self.population_fraction = population_fraction
-        self.reverse_probability = reverse_probability
+        self.max_reverse_probability = max_reverse_probability
         self.has_cache = False
         self.mutation_shape = []
         self.slices = None
@@ -70,21 +71,17 @@ class Reverse(OP):
 
         self.print_debug('num chromosomes', num_reversed_chromosomes)
 
-        if not self.has_cache:
-            self.print_debug("Caching fancy indexing")
-            self.has_cache = True
+        # compute the shape needed for the mutation
+        mutations_shape = [num_reversed_chromosomes]
+        for idx, frac in enumerate(self.max_reverse_probability):
+            max_genes = int(population.shape[idx + 1] * frac + 1)
+            num_genes = B.randint(0, high=max_genes)
+            mutations_shape.append(num_genes)
+            self.print_debug(idx, 'num_genes', num_genes, 'max', max_genes)
 
-            # compute the shape needed for the mutation
-            mutations_shape = [num_reversed_chromosomes]
-            for idx, frac in enumerate(self.reverse_probability):
-                num_genes = int(population.shape[idx + 1] * frac)
-                mutations_shape.append(num_genes)
-            self.mutations_shape = mutations_shape
-            self.print_debug("population_shape:", population.shape)
-            self.print_debug("mutation_shape:", self.mutations_shape)
-
-        else:
-            self.print_debug("Using cached fancy indexing")
+        self.mutations_shape = mutations_shape
+        self.print_debug("population_shape:", population.shape)
+        self.print_debug("mutation_shape:", self.mutations_shape)
 
         # compute the fancy indexing dynamlically
         # ! the start point must be randomized
@@ -112,43 +109,44 @@ class Reverse(OP):
 class Reverse1D(Reverse):
     def __init__(self,
                  population_fraction=0.9,
-                 reverse_probability=0.2,
+                 max_reverse_probability=0.2,
                  **kwargs):
-        if not isinstance(reverse_probability, float):
-            raise ValueError('crossover_probability must be a float')
+        if not isinstance(max_reverse_probability, float):
+            raise ValueError('max_reverse_probability must be a float')
 
         super(Reverse1D,
               self).__init__(population_fraction=population_fraction,
-                             reverse_probability=[reverse_probability],
+                             max_reverse_probability=[max_reverse_probability],
                              **kwargs)
 
 
 class Reverse2D(Reverse):
     def __init__(self,
                  population_fraction=0.9,
-                 reverse_probability=(0.2, 0.2),
+                 max_reverse_probability=(0.2, 0.2),
                  **kwargs):
 
-        if len(reverse_probability) != 2:
-            raise ValueError('crossover_probability must be of form (x, y)')
+        if len(max_reverse_probability) != 2:
+            raise ValueError('max_reverse_probability must be of form (x, y)')
         super(Reverse2D,
               self).__init__(population_fraction=population_fraction,
-                             reverse_probability=reverse_probability,
+                             max_reverse_probability=max_reverse_probability,
                              **kwargs)
 
 
 class Reverse3D(Reverse):
     def __init__(self,
                  population_fraction=0.9,
-                 reverse_probability=(0.2, 0.2, 0.2),
+                 max_reverse_probability=(0.2, 0.2, 0.2),
                  **kwargs):
 
-        if len(reverse_probability) != 3:
-            raise ValueError('crossover_probability must be of form (x, y, z)')
+        if len(max_reverse_probability) != 3:
+            raise ValueError(
+                'max_reverse_probability must be of form (x, y, z)')
 
         super(Reverse3D,
               self).__init__(population_fraction=population_fraction,
-                             crossover_probability=reverse_probability,
+                             max_reverse_probability=max_reverse_probability,
                              **kwargs)
 
 
@@ -157,11 +155,11 @@ if __name__ == '__main__':
     GENOME_SHAPE = (6, 4, 4)
     population = B.randint(0, 256, GENOME_SHAPE)
     population_fraction = 0.5
-    reverse_probability = (0.5, 0.5)
+    max_reverse_probability = (0.5, 0.5)
     cprint(population[0], 'blue')
     original_population = copy(population)
     population = Reverse2D(population_fraction,
-                           reverse_probability,
+                           max_reverse_probability,
                            debug=True)(population)
 
     cprint(population[0], 'yellow')

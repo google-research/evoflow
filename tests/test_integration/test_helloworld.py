@@ -17,7 +17,7 @@ import evoflow.backend as B
 from evoflow.ops import Input, RandomMutations1D, UniformCrossover1D
 from evoflow.selection import SelectFittest
 from evoflow.fitness import Sum
-from evoflow.population import genRandIntPopulation
+from evoflow.population import randint_population
 
 
 def test_helloworld():
@@ -26,7 +26,7 @@ def test_helloworld():
     SHAPE = (512, 1024)
     MAX_VAL = 1
 
-    population = genRandIntPopulation(SHAPE, MAX_VAL)
+    population = randint_population(SHAPE, MAX_VAL)
 
     inputs = Input(SHAPE)
     x = RandomMutations1D(max_gene_value=1)(inputs)

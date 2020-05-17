@@ -88,6 +88,17 @@ def test_randint_1D(backends):
         assert B.min(t) >= 0
 
 
+def test_single_number(backends):
+    for B in backends:
+        t = B.randint(11)
+        assert t <= 10
+        assert t >= 0
+
+        t = B.randint(5, 11)
+        assert t <= 10
+        assert t >= 5
+
+
 def test_randint_2SD(backends):
     for B in backends:
         t = B.randint(0, 11, shape=(10, 20))

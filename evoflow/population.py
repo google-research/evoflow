@@ -1,8 +1,8 @@
 import evoflow.backend as B
 
 
-def genRandIntPopulation(shape, max_value, min_value=0):
-    """Generate a random population of Chromosome made of Integers
+def randint_population(shape, max_value, min_value=0):
+    """Generate a random  population made of Integers
 
     Args:
         (set of ints): shape of the population. Its of the form
@@ -17,3 +17,25 @@ def genRandIntPopulation(shape, max_value, min_value=0):
     """
     high = max_value + 1
     return B.randint(low=min_value, high=high, shape=shape)
+
+
+def uniform_population(shape, dtype=B.intx()):
+    """Generate a uniform population made of Integers. Uniform means that
+    each chromosome contains only one time each value and each chromosome
+    have them in different order.
+
+    Args:
+        (set of ints): shape of the population. Its of the form
+        (num_chromosomes, chromosome size)
+
+        dtype (str): tensor type
+
+    Returns:
+        Tensor: uniform population.
+    """
+    population = []
+    chromosome = B.range(shape[1], dtype=dtype)
+    for i in range(shape[0]):
+        chromosome = B.shuffle(chromosome)
+        population.append(chromosome)
+    return B.tensor(population)

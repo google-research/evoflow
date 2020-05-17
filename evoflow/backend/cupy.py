@@ -16,7 +16,7 @@ import cupy as cp
 # sometime numpy is faster / cupy don't have the op.
 import numpy  # DON'T IMPORT AS np -- make it hard to distinguish with cupy.
 
-from .common import _infer_dtype
+from .common import _infer_dtype, intx, floatx
 
 
 # -initialization-
@@ -56,7 +56,7 @@ def copy(tensor):
     return cp.copy(tensor)
 
 
-def zeros(shape, dtype=float):
+def zeros(shape, dtype=floatx()):
     """Returns a new Tensor of given shape and dtype, filled with zeros.
     Args:
         shape (int or tuple of ints): Dimensionalities of the array.
@@ -69,7 +69,7 @@ def zeros(shape, dtype=float):
     return cp.zeros(shape, dtype=dtype)
 
 
-def ones(shape, dtype=float):
+def ones(shape, dtype=floatx()):
     """Returns a new Tensor of given shape and dtype, filled with ones.
     Args:
         shape (int or tuple of ints): Dimensionalities of the array.
@@ -110,6 +110,23 @@ def normal(shape, mean=0.0, dev=1.0):
 
     """
     return cp.random.normal(loc=mean, scale=dev, size=shape)
+
+
+def range(start, stop=None, step=1, dtype=intx()):
+    """Creates a sequence of numbers.
+    Creates a sequence of numbers that begins at `start` and extends by
+    increments of `delta` up to but not including `stop`.
+
+    Args:
+        start (int): Initial value. Optional. Defaults to 0
+        stop (int, optional): End value.
+        delta (int, optional): Spacing between values.  Defaults to 1.
+        dtype (str, optional): Tensor tyoe. Defaults to intx().
+
+    Returns:
+        Tensor: Tensor that contains the requested range.
+    """
+    return cp.arange(start, stop=stop, step=step, dtype=dtype)
 
 
 # - Reduce -
@@ -528,9 +545,9 @@ def randint(low, high=None, shape=None, dtype='l'):
     """Returns a scalar or an array of integer values over [low, high)
 
     Args:
-        low (int): If high is not None, it is the lower bound of the
-        interval. Otherwise, it is the upper bound of the interval and
-        lower bound of the interval is set to 0.
+        low (int): If high is None, it is the upper bound of the
+        interval and the lower bound is set to 0. if high is set, it is the
+        lower bound of the interval.
 
         high (int, optional):Upper bound of the interval. Defaults to None.
 
@@ -587,7 +604,7 @@ def full_shuffle(tensor):
     # ! in place.
 
     for idx in range(len(tensor.shape)):
-        shuffle(tensor, axis=idx)
+        shuffle(tensor, axis=int(idx))
 
     return tensor
 
@@ -613,10 +630,7 @@ def take(tensor, indices, axis=None, out=None):
     return cp.take(tensor, indices, axis=axis)
 
 
-def top_k_indices(
-    tensor,
-    k,
-):
+def top_k_indices(tensor, k):
     """
     Finds the indices of the k largest entries alongside an axis.
 
@@ -648,6 +662,21 @@ def bottom_k_indices(tensor, k, axis=-1):
     """
     idxs = cp.argpartition(tensor, k)[:k]
     return idxs[cp.argsort(tensor[idxs])]
+
+
+def unique_with_counts(tensor):
+    """Finds unique elements and return them along side their position and
+    counts.
+
+    Args:
+        tensor (Tensor): 1D tensor to analyze.
+
+    Returns:
+        values (Tensor): unique values founded
+        indexes (Tensor): index of the value sorted
+        counts (Tensor): Tensor containing the count for each value.
+    """
+    return cp.unique(tensor, return_index=True, return_counts=True)
 
 
 # - Statistical -

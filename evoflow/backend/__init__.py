@@ -27,6 +27,7 @@ from .load_backend import zeros  # noqa: F401
 from .load_backend import ones  # noqa: F401
 from .load_backend import fill  # noqa: F401
 from .load_backend import normal  # noqa: F401
+from .load_backend import range  # noqa: F401
 
 # - reduce -
 from .load_backend import prod  # noqa: F401
@@ -75,6 +76,7 @@ from .load_backend import full_shuffle  # noqa: F401
 from .load_backend import take  # noqa: F401
 from .load_backend import bottom_k_indices  # noqa: F401
 from .load_backend import top_k_indices  # noqa: F401
+from .load_backend import unique_with_counts  # noqa: F401
 
 # - Statistical -
 from .load_backend import bincount  # noqa: F401

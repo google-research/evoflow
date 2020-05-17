@@ -109,6 +109,23 @@ def normal(shape, mean=0, stddev=1.0):
     return tf.random.normal(shape, mean=mean, stddev=stddev)
 
 
+def range(start, stop=None, step=1, dtype=intx()):
+    """Creates a sequence of numbers.
+    Creates a sequence of numbers that begins at `start` and extends by
+    increments of `delta` up to but not including `stop`.
+
+    Args:
+        start (int): Initial value. Optional. Defaults to 0
+        stop (int, optional): End value.
+        delta (int, optional): Spacing between values.  Defaults to 1.
+        dtype (str, optional): Tensor tyoe. Defaults to intx().
+
+    Returns:
+        Tensor: Tensor that contains the requested range.
+    """
+    return tf.range(start, limit=stop, delta=step, dtype=dtype)
+
+
 # - Reduce -
 def prod(tensor, axis=None, keepdims=False):
     """Returns the product of an array along a given axis.
@@ -559,13 +576,13 @@ def norm(tensor, ord='euclidean', axis=None, keepdims=False):
 # - Randomness -
 
 
-def randint(low=0, high=None, shape=None, dtype=intx()):
+def randint(low, high=None, shape=None, dtype=intx()):
     """Returns a scalar or an array of integer values over [low, high)
 
     Args:
-        low (int): If high is not None, it is the lower bound of the
-        interval. Otherwise, it is the upper bound of the interval and
-        lower bound of the interval is set to 0.
+        low (int): If high is None, it is the upper bound of the
+        interval and the lower bound is set to 0. if high is set, it is the
+        lower bound of the interval.
 
         high (int, optional):Upper bound of the interval. Defaults to None.
 
@@ -580,6 +597,11 @@ def randint(low=0, high=None, shape=None, dtype=intx()):
         sampled. If size is integer, it is the 1D-array of length size
         element. Otherwise, it is the array whose shape specified by size.
     """
+
+    # just one number
+    if not shape:
+        return numpy.random.randint(low, high=high)
+
     if isinstance(shape, int):
         shape = (shape, )
     return tf.random.uniform(shape=shape, minval=low, maxval=high, dtype=dtype)
@@ -677,6 +699,21 @@ def bottom_k_indices(tensor, k, axis=-1):
     """
     # inverted top k and reinverted before returning
     return tf.math.top_k(tf.multiply(tensor, -1), k)[1]
+
+
+def unique_with_counts(tensor):
+    """Finds unique elements and return them along side their position and
+    counts.
+
+    Args:
+        tensor (Tensor): 1D tensor to analyze.
+
+    Returns:
+        values (Tensor): unique values founded
+        indexes (Tensor): index of the value sorted
+        counts (Tensor): Tensor containing the count for each value.
+    """
+    return tf.unique_with_counts(tensor)
 
 
 # - Statistical -

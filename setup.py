@@ -17,11 +17,11 @@ from setuptools import setup
 from setuptools import find_packages
 
 long_description = open("README.md").read()
-version = '0.3.1-%s' % int(time())
+version = '0.4.0+%s' % int(time())
 
 setup(name='evoflow',
       version=version,
-      description='Genetic Algorithms for humans',
+      description='Genetic algorithms for humans',
       long_description=long_description,
       long_description_content_type="text/markdown",
       author='Elie Bursztein',
