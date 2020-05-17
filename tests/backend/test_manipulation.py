@@ -13,6 +13,28 @@
 # limitations under the License.
 
 
+def test_roll(backends):
+    inputs = [1, 2, 3]
+    expected = [3, 1, 2]
+
+    for B in backends:
+        tensor = B.tensor(inputs)
+        result = B.roll(tensor, 1, axis=0)
+        expected_tensor = B.tensor(expected)
+        assert B.tensor_equal(result, expected_tensor)
+
+
+def test_roll_2d(backends):
+    inputs = [[1, 2, 3], [1, 2, 3]]
+    expected = [[3, 1, 2], [3, 1, 2]]
+
+    for B in backends:
+        tensor = B.tensor(inputs)
+        result = B.roll(tensor, 1, axis=1)
+        expected_tensor = B.tensor(expected)
+        assert B.tensor_equal(result, expected_tensor)
+
+
 def test_assign(backends):
     inputs = [[11, 12, 13], [21, 22, 23], [31, 32, 33]]
     values = [[1, 1], [1, 1]]

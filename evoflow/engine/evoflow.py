@@ -94,6 +94,8 @@ class EvoFlow(object):
             return
 
         populations = box(populations)
+        self.print_debug("Initial Populations", populations)
+
         if not len(populations) == len(self.inputs):
             raise ValueError('The numbers of population must be equal\
                  to number of inputs')
@@ -105,23 +107,27 @@ class EvoFlow(object):
             pop = self.inputs[pop_idx].get()
             current_populations.append(pop)
         num_populations = len(current_populations)
+        self.print_debug('Initial current_populations', current_populations)
 
         # main loop
-        pb = tqdm(total=generations)
+        pb = tqdm(total=generations, unit='generation')
         for evolution_idx in range(generations):
             evolved_populations = self.perform_evolution()
             # assign evolved population
+            self.print_debug(evolution_idx, 'evolved pop', evolved_populations)
 
             fitness_scores_list = []  # keep track of fitness score accros pops
             for pop_idx in range(num_populations):
                 # find current informaiton
-                current_population = current_populations[pop_idx]
-                evolved_population = evolved_populations[pop_idx]
+                current_pop = current_populations[pop_idx]
+                evolved_pop = evolved_populations[pop_idx]
                 fitness_function = self.fitness_functions[pop_idx]
 
+                self.print_debug('current_population', pop_idx, current_pop)
+                self.print_debug('evolved_population', pop_idx, evolved_pop)
                 # select population
                 new_population, fitness_scores, metrics = self.selection_strategy(  # noqa
-                    fitness_function, current_population, evolved_population)
+                    fitness_function, current_pop, evolved_pop)
 
                 # update metrics
                 self._results.record_metrics(metrics)

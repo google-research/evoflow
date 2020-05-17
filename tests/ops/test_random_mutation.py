@@ -28,6 +28,14 @@ def test_binary_val_default_params():
     assert not B.min(population)
 
 
+def test_clip():
+    pop_shape = (100, 100)
+    population = B.randint(0, 100, pop_shape)
+    population = RandomMutations1D(max_gene_value=100, debug=1)(population)
+    assert B.max(population) <= 100
+    assert not B.min(population)
+
+
 def test_mutation2d_eager():
     pop_shape = (2, 4, 4)
     max_gene_value = 10

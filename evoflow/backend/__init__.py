@@ -37,6 +37,8 @@ from .load_backend import mean  # noqa: F401
 from .load_backend import sqrt  # noqa: F401
 
 # - Manipulation -
+from .load_backend import reverse  # noqa: F401
+from .load_backend import roll  # noqa: F401
 from .load_backend import assign  # noqa: F401
 from .load_backend import tile  # noqa: F401
 from .load_backend import concatenate  # noqa: F401

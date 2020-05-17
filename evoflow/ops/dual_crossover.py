@@ -68,8 +68,7 @@ class DualCrossover(OP):
         num_crossover_chromosomes = int(population.shape[0] *
                                         self.population_fraction)
 
-        if self.debug:
-            print('num chromosomes', num_crossover_chromosomes)
+        self.print_debug('num chromosomes', num_crossover_chromosomes)
 
         if not self.has_cache:
             self.print_debug("Caching fancy indexing")
@@ -152,7 +151,6 @@ class DualCrossover3D(DualCrossover):
 
 if __name__ == '__main__':
     from copy import copy
-    print(B.backend())
     GENOME_SHAPE = (6, 4, 4)
     population = B.randint(0, 256, GENOME_SHAPE)
     population_fraction = 0.5

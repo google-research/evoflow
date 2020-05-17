@@ -159,7 +159,6 @@ class UniformCrossover3D(UniformCrossover):
 
 if __name__ == '__main__':
     from copy import copy
-    print(B.backend())
     GENOME_SHAPE = (10, 4, 4)
     population = B.randint(0, 1024, GENOME_SHAPE)
     population_fraction = 0.5

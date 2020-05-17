@@ -19,7 +19,19 @@ from evoflow.engine import SelectionStrategy
 class SelectFittest(SelectionStrategy):
     "Select the fittest member of the population"
 
-    def __init__(self, **kwargs):
+    def __init__(self, mode='max', **kwargs):
+        """[summary]
+
+        Args:
+            mode (str, optional):  one of `{min', 'max'}`. In 'min' mode,
+            the fitness function will select individual with the lowest fitness
+            value; in 'max' mode it will select the one with the highest
+            values. Defaults to 'max'.
+        """
+        if mode not in ['min', 'max']:
+            raise ValueError('mode must be either max or min')
+
+        self.mode = mode
         super(SelectFittest, self).__init__('select_fittest', **kwargs)
 
     def call(self, fitness_function, current_population, evolved_population):
@@ -45,8 +57,11 @@ class SelectFittest(SelectionStrategy):
         metrics = fitness_function.get_metrics()
 
         # population selection
-        top_k_indices = B.top_k_indices(fitness_scores, k=population_size)
-        selected_pop = B.take(merged_population, top_k_indices, axis=0)
+        if self.mode == 'max':
+            indices = B.top_k_indices(fitness_scores, k=population_size)
+        else:
+            indices = B.bottom_k_indices(fitness_scores, k=population_size)
 
-        return selected_pop, B.take(fitness_scores, top_k_indices,
-                                    axis=0), metrics
+        selected_pop = B.take(merged_population, indices, axis=0)
+
+        return selected_pop, B.take(fitness_scores, indices, axis=0), metrics

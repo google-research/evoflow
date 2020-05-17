@@ -21,6 +21,14 @@ from .core import Dummy  # noqa: F401
 # inputs
 from ..engine.input import Input  # noqa: F401
 
+# Shuffle
+from .shuffle import Shuffle  # noqa: F401
+
+# Reverse
+from .reverse import Reverse1D  # noqa: F401
+from .reverse import Reverse2D  # noqa: F401
+from .reverse import Reverse3D  # noqa: F401
+
 # mutation
 from .random_mutation import RandomMutations1D  # noqa: F401
 from .random_mutation import RandomMutations2D  # noqa: F401

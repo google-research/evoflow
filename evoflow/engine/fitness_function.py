@@ -19,12 +19,11 @@ from collections import defaultdict
 
 
 class FitnessFunction(object):
-    """Loss base classe.
+    """Fitness base classe.
     To be implemented by subclasses:
     * `call()`: Contains the logic for fitness calculation using `genes.
     """
-    def __init__(self, name, **kwargs):
-        self.name = name
+    def __init__(self, **kwargs):
         self.debug = kwargs.get('debug', False)
         self._metrics = defaultdict(dict)
 
@@ -66,7 +65,8 @@ class FitnessFunction(object):
         """
         return self._metrics
 
-    def print_debug(self, msg):
+    def print_debug(self, *msg):
         "output debug message"
         if self.debug:
-            print_debug(self.name, msg)
+            name = self.__class__.__name__
+            print_debug(name, msg)

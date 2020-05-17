@@ -214,6 +214,30 @@ def sqrt(tensor):
 # - Manipulation -
 
 
+def reverse(tensor, axis):
+    """Reverses specific dimensions of a tensor.
+
+    Args:
+        tensor (tensor): tensor to reverse
+        axis (tensor): axis or tuple of axis
+    """
+    return np.flip(tensor, axis)
+
+
+def roll(tensor, shift, axis):
+    """Rolls the elements of a tensor along an axis.
+
+    Args:
+        tensor (tensor): tensor to roll
+        shift (tensor): offset to roll
+        axis (tensor): axis to shift by
+
+    Returns:
+        [type]: [description]
+    """
+    return np.roll(tensor, shift, axis)
+
+
 def assign(dst_tensor, values, slices):
     """ assign values in tensor at the position specified by the slices.
 

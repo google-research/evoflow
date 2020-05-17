@@ -29,7 +29,7 @@ class Sum(FitnessFunction):
             This fitness function is used to solve the MAXONE problem.
 
         """
-        super(Sum, self).__init__('sum_genes', **kwargs)
+        super(Sum, self).__init__(**kwargs)
         if max_sum_value:
             self.max_sum_value = B.tensor(max_sum_value)
         else:

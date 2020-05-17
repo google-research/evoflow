@@ -27,8 +27,7 @@ class InvertedCosineSimilarity(FitnessFunction):
         Args:
             reference_chromosome (tensor1D): reference_chromosome.
         """
-        super(InvertedCosineSimilarity, self).__init__('invet_cosine_sim',
-                                                       **kwargs)
+        super(InvertedCosineSimilarity, self).__init__(**kwargs)
 
         # cache ref chromosome flattend
         self.ref_chromosome = B.flatten(B.tensor(reference_chromosome))

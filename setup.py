@@ -17,7 +17,7 @@ from setuptools import setup
 from setuptools import find_packages
 
 long_description = open("README.md").read()
-version = '0.3.%s' % int(time())
+version = '0.3.1-%s' % int(time())
 
 setup(name='evoflow',
       version=version,

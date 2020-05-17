@@ -24,4 +24,4 @@ def print_debug(component, *msg):
         a normal print.
     """
     msg = " ".join(str(m) for m in msg)
-    cprint('[DEBUG]%s:%s' % (component, msg))
+    cprint('\n[DEBUG]%s:%s' % (component, msg))
