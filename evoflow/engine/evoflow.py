@@ -87,7 +87,7 @@ class EvoFlow(object):
     def history(self):
         return self._history
 
-    def evolve(self, populations, generations=1, callbacks=None):
+    def evolve(self, populations, generations=1, callbacks=None, verbose=1):
 
         if not self.compiled:
             raise ValueError("compile() must be run before using the graph")
@@ -109,20 +109,24 @@ class EvoFlow(object):
         num_populations = len(current_populations)
         self.print_debug('Initial current_populations', current_populations)
 
-        # main loop
-        pb = tqdm(total=generations, unit='generation')
-        for evolution_idx in range(generations):
+        # progress bar
+        if verbose:
+            pb = tqdm(total=generations, unit='generation')
+
+        # evolve loop
+        for generation_idx in range(generations):
 
             # callbacks
             if callbacks:
                 for callback in callbacks:
-                    callback.on_generation_begin(evolution_idx)
+                    callback.on_generation_begin(generation_idx)
 
             # perform evolution
             evolved_populations = self.perform_evolution()
 
             # assign evolved populations
-            self.print_debug(evolution_idx, 'evolved pop', evolved_populations)
+            self.print_debug(generation_idx, 'evolved pop',
+                             evolved_populations)
 
             fitness_scores_list = []  # keep track of fitness score accros pops
             for pop_idx in range(num_populations):
@@ -155,19 +159,21 @@ class EvoFlow(object):
             # callbacks
             if callbacks:
                 for callback in callbacks:
-                    callback.on_generation_end(latest_metrics,
+                    callback.on_generation_end(generation_idx, latest_metrics,
                                                fitness_scores_list,
                                                populations)
 
             # progress bar
-            formatted_metrics = {}
-            for name, value in latest_metrics.items():
-                name = name.lower().replace(' ', '_')
-                formatted_metrics[name] = value
-            pb.set_postfix(formatted_metrics)
-            pb.update()
+            if verbose:
+                formatted_metrics = {}
+                for name, value in latest_metrics.items():
+                    name = name.lower().replace(' ', '_')
+                    formatted_metrics[name] = value
+                pb.set_postfix(formatted_metrics)
+                pb.update()
 
-        pb.close()
+        if verbose:
+            pb.close()
 
         # record last population
         self._results.set_population(current_populations)

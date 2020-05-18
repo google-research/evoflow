@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .engine.callback import Callback
+from .callback import Callback
 
 
 class DummyCallback(Callback):
@@ -21,5 +21,6 @@ class DummyCallback(Callback):
     def on_generation_begin(self, generation):
         assert isinstance(generation, int)
 
-    def on_generation_end(self, metrics, fitness_scores, populations):
+    def on_generation_end(self, generation, metrics, fitness_scores,
+                          populations):
         pass

@@ -63,7 +63,8 @@ class SelectionStrategy(object):
         return self.call(fitness_function, current_population,
                          evolved_population)
 
-    def print_debug(self, msg):
+    def print_debug(self, *msg):
         "output debug message"
         if self.debug:
-            print_debug(self.name, msg)
+            name = self.__class__.__name__
+            print_debug(name, msg)

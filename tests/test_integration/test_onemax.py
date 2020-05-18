@@ -18,6 +18,7 @@ from evoflow.ops import Input, RandomMutations1D, UniformCrossover1D
 from evoflow.selection import SelectFittest
 from evoflow.fitness import Sum
 from evoflow.population import randint_population
+from evoflow.callbacks import DummyCallback
 
 
 def test_helloworld():
@@ -36,7 +37,9 @@ def test_helloworld():
     evolution_strategy = SelectFittest()
     gf.compile(evolution_strategy, fitness_function)
     gf.summary()
-    results = gf.evolve(population, generations=NUM_EVOLUTIONS)
+    results = gf.evolve(population,
+                        generations=NUM_EVOLUTIONS,
+                        callbacks=[DummyCallback()])
     assert results
 
     metrics = results.get_metrics_history()

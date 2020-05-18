@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-__version__ = '0.3.0'
-
-# ! DO NOT pollute scope as it can cause premature backend loading.
+# ! DO NOT pollute the scope as it can cause premature backend loading.
 # ! No reference to any subpackage here
+
+__version__ = '0.4.0'

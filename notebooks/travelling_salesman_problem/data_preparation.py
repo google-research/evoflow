@@ -2,12 +2,10 @@ from tqdm.auto import tqdm
 from termcolor import cprint
 import codecs
 from itertools import permutations
-from operator import itemgetter
 from geopy.distance import distance
 import numpy as np
 import json
 import sys
-import random
 
 FNAME_IN = "data/cities15000.txt"
 OUT_DIR = "data/"

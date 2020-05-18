@@ -1,7 +1,6 @@
 # EvoFlow - Evolutionary algorithms for humans
 ![TensorFlow](https://github.com/google-research/evoflow/workflows/TensorFlow/badge.svg) ![Numpy](https://github.com/google-research/evoflow/workflows/Numpy/badge.svg)
 
-
 ## You have just found EvoFlow
 
 EvoFlow is a modern hardware accelerated genetic algorithm framework that recast
@@ -17,8 +16,18 @@ Google Colab or it will just work fine on your CPU.
 ## Getting started in 30 seconds
 
 1. Install EvoFlow: `pip install evoflow`
-2. Head to our [hello world notebook](https://github.com/google-research/evoflow/blob/master/notebooks/maxone.ipynb)
-   that shows you how to use EvoFlow to solve the classic MaxOne problem.
+2. Head to our [hello world notebook](https://github.com/google-research/evoflow/blob/master/notebooks/maxone.ipynb) that will shows you how to use EvoFlow to solve the classic MaxOne problem.
+
+## Tutorials
+
+The following tutorials are availables
+
+| Problem                 | Description                                                 | Key concepts showcased                                                                                                                                             |
+| ----------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| MaxOne                  | Maximize the number of ones in a chromosome                 | <ul><li>`EvoFlow` core API</li><li>`RandomMutation` OP</li><li> `UniformCrossOver` Op</li><li>Evolution model construction</li><li>`Results` basic usage</li></ul> |
+| Travel Salesman problem | Visit each city once while minimizing the distance traveled | <ul><li>Custom `Fitness function`</li><li>Genes permuting Ops: `Shuffle` and `Reverse`</li><li>Evolution model programatic construction</li></ul>                  |
+
+Genetic Algorithm are used to solve a [wide variety of problems](https://en.wikipedia.org/wiki/List_of_genetic_algorithm_applications)
 
 ## Deep-learning versus Evoluationary algorithms
 
@@ -50,12 +59,12 @@ need to be differentiable and aim to be maximized.
 
 ### EvoFlow Terminology
 
-- **evoluationary op**: Operation performed on a population of chromosome to
+- **Evoluation op**: Operation performed on a population of chromosome to
 make them evolve. Common ops includes various type of Chromosomal crossovers
 and Chromosomal mutations. Equivalent to deep-learning layers
 (e.g a convolution layer).
 
-- **evoluationary model**: Directed graph of evolutionary ops that is used
+- **Evolution model**: Directed graph of evolutionary ops that is used
   to evolve the population. This is equivalent to a model architecture
   in deep-learning settings.
 

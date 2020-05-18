@@ -4,6 +4,8 @@
 
 ### New features
 
+* Callbacks can now be added to the evolve loop
+
 ### New genetic operations
 
 The new added ops are meant to allow to solve problem that requires to maintain
@@ -24,6 +26,8 @@ The backend now offers the following functions:
 
 * `SelectFitest()` now allows to select individuals with the lowest fitness value.
 * `RandomMutation()` now clip to max_value - 1 to be consistent with `randInt()`
+* `evolve` now support `verbose=0` to suppress progress bar. Useful to override
+  training UI with callback.
 
 As usual also a lot of bug fixes.
 

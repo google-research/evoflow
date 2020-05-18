@@ -25,11 +25,12 @@ class Callback(object):
         """Called at the start of a generation.
 
         Args:
-            generation (int): Generation id.
+            generation_idx (int): Generation.
         """
         pass
 
-    def on_generation_end(self, metrics, fitness_scores, populations):
+    def on_generation_end(self, generation, metrics, fitness_scores,
+                          populations):
         """Called at the end of a generation.
 
         Args:
