@@ -87,7 +87,7 @@ class EvoFlow(object):
     def history(self):
         return self._history
 
-    def evolve(self, populations, generations=1):
+    def evolve(self, populations, generations=1, callbacks=None):
 
         if not self.compiled:
             raise ValueError("compile() must be run before using the graph")
@@ -112,8 +112,16 @@ class EvoFlow(object):
         # main loop
         pb = tqdm(total=generations, unit='generation')
         for evolution_idx in range(generations):
+
+            # callbacks
+            if callbacks:
+                for callback in callbacks:
+                    callback.on_generation_begin(evolution_idx)
+
+            # perform evolution
             evolved_populations = self.perform_evolution()
-            # assign evolved population
+
+            # assign evolved populations
             self.print_debug(evolution_idx, 'evolved pop', evolved_populations)
 
             fitness_scores_list = []  # keep track of fitness score accros pops
@@ -143,6 +151,15 @@ class EvoFlow(object):
             self._results.record_fitness(fitness_scores_list)
 
             latest_metrics = self._results.get_latest_metrics(flatten=True)
+
+            # callbacks
+            if callbacks:
+                for callback in callbacks:
+                    callback.on_generation_end(latest_metrics,
+                                               fitness_scores_list,
+                                               populations)
+
+            # progress bar
             formatted_metrics = {}
             for name, value in latest_metrics.items():
                 name = name.lower().replace(' ', '_')
