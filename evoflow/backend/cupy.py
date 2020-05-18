@@ -251,7 +251,12 @@ def reverse(tensor, axis):
         tensor (tensor): tensor to reverse
         axis (tensor): axis or tuple of axis
     """
-    return cp.flip(tensor, axis)
+    if isinstance(axis, int):
+        return cp.flip(tensor, axis)
+    else:
+        for ax in axis:
+            tensor = cp.flip(tensor, axis=ax)
+        return tensor
 
 
 def roll(tensor, shift, axis):
