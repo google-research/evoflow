@@ -32,7 +32,7 @@ setup(name='evoflow',
       package_data={"": ["*.json"]},
       install_requires=[
           'networkx', 'numpy', 'tqdm', 'tabulate', 'termcolor', 'matplotlib',
-          'plotly', 'tensorflow>=2.2.0'
+          'altair', 'tensorflow>=2.2.0', 'pandas'
       ],
       classifiers=[
           'Development Status :: 5 - Production/Stable',

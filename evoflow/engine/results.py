@@ -14,9 +14,9 @@
 
 from time import time
 from collections import defaultdict
-import plotly.graph_objects as go
+import altair as alt
 from tabulate import tabulate
-
+import pandas as pd
 import evoflow.backend as B
 from evoflow.utils import unbox
 from evoflow.io import print_debug
@@ -96,19 +96,34 @@ class Results(object):
                     headers=['fit score',
                              'genes [:%d]' % max_chromosome_len]))
 
-    def plot_metrics(self):
+    def plot_fitness(self):
         """Plots the various metrics"""
-        metrics = self.get_metrics_history()
-        for group_name, group_data in metrics.items():
-            fig = go.Figure()
-            for name, values in group_data.items():
-                fig.add_trace(go.Scatter(y=values, name=name, mode='lines'))
+        return self._build_plot('Fitness function')
 
-            fig.update_layout(
-                title=group_name,
-                xaxis_title='generations',
-            )
-            fig.show()
+    def plot_metrics(self, group_name):
+        """Plots group metrics"""
+        return self._build_plot(group_name)
+
+    def _build_plot(self, metric_group):
+        "Build an altair plot for a given metric group"
+        metrics = self.get_metrics_history()
+        if metric_group not in metrics:
+            raise ValueError("can't find metric group")
+
+        data = metrics[metric_group]
+        rows = []
+        for name, values in data.items():
+            for idx, val in enumerate(values):
+                rows.append({'generation': idx, 'metric': name, 'value': val})
+        metrics_pd = pd.DataFrame(rows)
+        chart = alt.Chart(metrics_pd,
+                          title='Fitness function').mark_line().encode(
+                              x='generation', y='value',
+                              color='metric').configure_title(fontSize=16,
+                                                              offset=5,
+                                                              orient='top',
+                                                              anchor='middle')
+        return chart
 
     def get_metrics_history(self):
         """Get the last evolution metrics values
