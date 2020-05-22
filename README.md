@@ -1,5 +1,9 @@
 # EvoFlow - Evolutionary algorithms for humans
-![TensorFlow](https://github.com/google-research/evoflow/workflows/TensorFlow/badge.svg) ![Numpy](https://github.com/google-research/evoflow/workflows/Numpy/badge.svg)
+
+![EvoFlow logo](https://storage.googleapis.com/evoflow/logo/evoflow-logo-1024.png)
+
+![TensorFlow](https://github.com/google-research/evoflow/workflows/TensorFlow/badge.svg)
+![Numpy](https://github.com/google-research/evoflow/workflows/Numpy/badge.svg)
 
 ## You have just found EvoFlow
 
