@@ -6,6 +6,9 @@
 
 ### Notable improvements and major changes
 
+* Moved from ploty to altair for results plotting for privacy reasons. Plotly
+  graph being rendered on plotly servers. Also makes notebook smaller
+  and rending faster.
 * TSP notebook simplified and improved
 * Many cupy and numpy backend bugs fixed
 
