@@ -52,9 +52,9 @@ def test_uniform_2Dcrossover_randomness_shape():
                 mr += 1
                 mc += s
 
-        assert abs(mutated_rows - mr) < 2
+        assert abs(mutated_rows - mr) <= 2
         assert abs(B.cast(mutated_cells, B.floatx()) -
-                   (mc / mutated_rows)) < 2.0  # noqa
+                   (mc / mutated_rows)) <= 2.0
 
 
 def test_uniformcrossover2d_distribution():
