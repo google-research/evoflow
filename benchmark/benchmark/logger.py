@@ -21,7 +21,7 @@ class Logger():
         if not result_dir.exists():
             result_dir.mkdir()
 
-        fname = result_dir / ("%s_%s_%s" % (backend, gpu, self.ts))
+        fname = result_dir / ("%s_%s_%s.json" % (backend, gpu, self.ts))
         self.out = open(str(fname), 'w+')
         self.rows = []
         cprint('Bench results will be saved here:%s' % fname, 'green')
