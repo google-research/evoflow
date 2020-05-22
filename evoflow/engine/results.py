@@ -100,7 +100,7 @@ class Results(object):
         """Plots the various metrics"""
         return self._build_plot('Fitness function')
 
-    def plot_metrics(self, group_name):
+    def plot(self, group_name):
         """Plots group metrics"""
         return self._build_plot(group_name)
 
