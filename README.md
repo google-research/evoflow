@@ -1,6 +1,6 @@
 # EvoFlow - Evolutionary algorithms for humans
 
-![EvoFlow logo](https://storage.googleapis.com/evoflow/logo/evoflow-logo-1024.png)
+![EvoFlow logo](https://storage.googleapis.com/evoflow/logo/evoflow-logo-768.png)
 
 ![TensorFlow](https://github.com/google-research/evoflow/workflows/TensorFlow/badge.svg)
 ![Numpy](https://github.com/google-research/evoflow/workflows/Numpy/badge.svg)
