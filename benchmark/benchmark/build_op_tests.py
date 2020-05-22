@@ -1,23 +1,16 @@
 def build_op_test(shape):
     from evoflow.population import randint_population
-    from benchmark.random_mutation import bench_random_mutation
-    from benchmark.uniform_crossover import bench_uniform_crossover
-    from benchmark.single_crossover import bench_single_crossover
-    from benchmark.dual_crossover import bench_dual_crossover
-    from benchmark.reverse import bench_reverse
-    from benchmark.shuffle import bench_shuffle
+    from .ops.random_mutation import bench_random_mutation
+    from .ops.uniform_crossover import bench_uniform_crossover
+    from .ops.single_crossover import bench_single_crossover
+    from .ops.dual_crossover import bench_dual_crossover
+    from .ops.reverse import bench_reverse
+    from .ops.shuffle import bench_shuffle
+    from .utils import shape2opdim
 
     TESTS = []
     population = randint_population(shape, max_value=255)
-
-    if len(shape) == 2:
-        OP_DIM = "1D"
-    elif len(shape) == 3:
-        OP_DIM = "2D"
-    elif len(shape) == 4:
-        OP_DIM = "3D"
-    else:
-        raise ValueError('Too many dimensions')
+    OP_DIM = shape2opdim(shape)
 
     TESTS.append(['OP', 'Shuffle', OP_DIM, bench_shuffle, population, shape])
 

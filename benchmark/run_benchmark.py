@@ -8,9 +8,10 @@ from benchmark.setup import setup
 
 def bench(sys_info, logger):
     # ! keep benchmark functions import here so backend selection works
-    from benchmark.maxone import solve_onmax_1d, solve_onmax_2d
-    from benchmark.tsp import solve_tsp, tsp_setup
+    from benchmark.problems.maxone import solve_onmax_1d, solve_onmax_2d
+    from benchmark.problems.tsp import solve_tsp, tsp_setup
     from benchmark.build_op_tests import build_op_test
+    from benchmark.others.fittest import build_fittest_test
 
     GENS = 10
     NUM_RUNS = 3
@@ -22,12 +23,15 @@ def bench(sys_info, logger):
     # Ops
     for shape in SHAPE1D:
         TESTS.extend(build_op_test(shape))
+        TESTS.extend(build_fittest_test(shape))
 
     for shape in SHAPE2D:
         TESTS.extend(build_op_test(shape))
+        TESTS.extend(build_fittest_test(shape))
 
     for shape in SHAPE3D:
         TESTS.extend(build_op_test(shape))
+        TESTS.extend(build_fittest_test(shape))
 
     # TSP setup
     for num_cities in [10, 50, 100, 200]:
