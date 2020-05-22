@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.4.1
+
+* Benchmarking system implemented - see `/benchmark/benchmark_analysis.ipynb`
+
+### Notable improvements and major changes
+
+* TSP notebook simplified and improved
+* Many cupy and numpy backend bugs fixed
+
 ## v0.4
 
 ### New features

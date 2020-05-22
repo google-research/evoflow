@@ -617,7 +617,7 @@ def full_shuffle(tensor):
 # - Indexing -
 
 
-def take(tensor, indices, axis=None, out=None):
+def take(t, indices, axis=None, out=None):
     """Takes elements of a Tensor at specified indices along a specified axis
 
     Args:
@@ -632,7 +632,9 @@ def take(tensor, indices, axis=None, out=None):
     Returns:
         ndarray: Tensor containing the values from the specified indices.
     """
-    return cp.take(tensor, indices, axis=axis)
+    if not is_tensor(t):
+        t = tensor(t)
+    return cp.take(t, indices, axis=0)
 
 
 def top_k_indices(tensor, k):

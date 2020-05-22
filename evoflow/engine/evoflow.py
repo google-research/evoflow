@@ -22,6 +22,8 @@ from evoflow.utils import box
 from evoflow.io import print_debug
 from .results import Results
 
+import tensorflow as tf
+
 
 class EvoFlow(object):
     def __init__(self, inputs, outputs, debug=False):
