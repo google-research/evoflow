@@ -15,4 +15,6 @@ def test_shuffle():
 
         assert B.is_tensor(population)
         assert population.shape == shape
-        assert B.sum(diff) > int(B.prod(shape) / 2)
+        sum_diff = B.sum(diff)
+        shape_size = int(B.prod(shape) / 2)
+        assert sum_diff >= shape_size
