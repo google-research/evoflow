@@ -1,4 +1,4 @@
-# EvoFlow - Evolutionary algorithms for humans
+# EvoFlow - Genetic algorithms for humans
 
 ![EvoFlow logo](https://storage.googleapis.com/evoflow/logo/evoflow-logo-768.png)
 
