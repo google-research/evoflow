@@ -25,7 +25,6 @@ class RandomMutations(OP):
                  max_gene_value=None,
                  min_mutation_value=1,
                  max_mutation_value=1,
-                 use_tf=False,
                  **kwargs):
         """Perform random mutations
 
@@ -70,68 +69,70 @@ class RandomMutations(OP):
         self.max_gene_value = max_gene_value
         self.min_mutation_value = min_mutation_value
         self.max_mutation_value = max_mutation_value
-        self.use_tf = use_tf
         super(RandomMutations, self).__init__(**kwargs)
 
-    def call(self, population):
+    def call(self, populations):
+        """ Create the mask use to generate mutations
 
-        # three tensors:
-        # m1 mutations + padding (affected population)
-        # m2 = m1 + zero() (population size)
-        affected_population = int(population.shape[0] *
-                                  self.population_fraction)
-        self.print_debug('affected_population', affected_population)
-        # compute number of mutation
-        mask_shape = [affected_population]
-        num_mutations = affected_population
-        total_size = affected_population
-        for idx, dim_size in enumerate(population.shape[1:]):
-            midx = idx - 1  # recall dimension 0 is the population
-            mask_shape.append(dim_size)
-            total_size *= dim_size
+        Args:
+            population_shape (list): population tensor shape.
+        Returns:
+            tensor: mask
 
-            # how many mutation
-            dim_mutations = int(dim_size * self.mutations_probability[midx])
-            num_mutations *= dim_mutations
+        Generation works by:
+        1. creating a slice that contains the mutation
+        2. Inserting it into the mask
+        3. Shuffle the mask in every dimension to distribute them
+        """
+        results = []
 
-        # draw mutations
-        mutations = B.randint(self.min_mutation_value,
-                              self.max_mutation_value + 1,
-                              shape=(num_mutations))
-        self.print_debug('mutations shape', mutations.shape)
+        for population in populations:
 
-        # padding of zero for the affect population
-        padding_size = total_size - num_mutations
-        non_mutations = B.zeros((padding_size), dtype=population.dtype)
-        self.print_debug('non mutations', non_mutations.shape)
+            affected_population = int(population.shape[0] *
+                                      self.population_fraction)
 
-        # construct the mask
-        self.print_debug('mask shape', mask_shape)
-        mask = B.concatenate([mutations, non_mutations])
-        mask = B.shuffle(mask)
-        mask = B.reshape(mask, shape=mask_shape)
-        self.print_debug('mutation mask', mask)
+            # Build sub tensors & slices by iterating through tensor dimensions
+            sub_tensor_shape = [affected_population]
+            slices = [slice(0, affected_population)]
+            for idx, pop_size in enumerate(population.shape[1:]):
+                midx = idx - 1  # recall dim1 are genes.
 
-        # extra padding to match population size if needed
-        non_affected_population = population.shape[0] - affected_population
-        if non_affected_population:
-            padding_size = [non_affected_population]
-            padding_size.extend([x for x in population.shape[1:]])
-            padding = B.zeros((padding_size), dtype=population.dtype)
-            mask = B.concatenate([mask, padding])
+                max_genes = int(pop_size * self.mutations_probability[midx])
+                # FIXME: potentially randomize the number of genes
+                # num_genes = B.randint(0, high=max_genes)
 
-        # mutate
-        population = population + mask
+                num_genes = max_genes
+                sub_tensor_shape.append(num_genes)
+                slices.append(slice(0, num_genes))
+            slices = tuple(slices)
+            self.print_debug("sub_tensor_shape", sub_tensor_shape)
 
-        # normalize
-        if self.max_gene_value or self.min_gene_value:
-            self.print_debug("min_gen_val", self.min_gene_value)
-            self.print_debug("max_gen_val", self.max_gene_value)
+            # drawing mutations
+            mutations = B.randint(self.min_mutation_value,
+                                  self.max_mutation_value + 1,
+                                  shape=sub_tensor_shape)
+            # blank mask
+            mask = B.zeros(population.shape, dtype=B.intx())
 
-            population = B.clip(population,
-                                min_val=self.min_gene_value,
-                                max_val=self.max_gene_value)
-        return population
+            # add mutations
+            mask = B.assign(mask, mutations, slices)
+
+            # shuffle mask every axis
+            mask = B.full_shuffle(mask)
+
+            # mutate
+            population = population + mask
+
+            # normalize
+            if self.max_gene_value or self.min_gene_value:
+                self.print_debug("min_gen_val", self.min_gene_value)
+                self.print_debug("max_gen_val", self.max_gene_value)
+
+                population = B.clip(population,
+                                    min_val=self.min_gene_value,
+                                    max_val=self.max_gene_value)
+            results.append(population)
+        return results
 
 
 class RandomMutations1D(RandomMutations):
@@ -202,8 +203,8 @@ class RandomMutations3D(RandomMutations):
 
 if __name__ == '__main__':
     from copy import copy
-    from time import time
-    pop_shape = (100, 100, 100)
+
+    pop_shape = (2, 4, 4)
     max_gene_value = 10
     min_gene_value = 0
     population_fraction = 1
@@ -212,52 +213,19 @@ if __name__ == '__main__':
     max_mutation_value = 1
 
     population = B.randint(0, max_gene_value, pop_shape)
-
     RM = RandomMutations2D(population_fraction=population_fraction,
                            mutations_probability=mutations_probability,
                            min_gene_value=min_gene_value,
                            max_gene_value=max_gene_value,
                            min_mutation_value=min_mutation_value,
                            max_mutation_value=max_mutation_value,
-                           optimize=False)
-
-    TF_RM = RandomMutations2D(population_fraction=population_fraction,
-                              mutations_probability=mutations_probability,
-                              min_gene_value=min_gene_value,
-                              max_gene_value=max_gene_value,
-                              min_mutation_value=min_mutation_value,
-                              max_mutation_value=max_mutation_value)
-    TF_RM(population)
-
-    start = time()
+                           debug=True)
     RM(population)
-    print('optimize=false time', time() - start)
-    start = time()
-    population = TF_RM(population)
-    print('optimize=true time', time() - start)
-
-    # display
-    pop_shape = (6, 4, 4)
-    max_gene_value = 10
-    min_gene_value = 0
-    population_fraction = 0.5
-    mutations_probability = (0.5, 0.5)
-    min_mutation_value = 1
-    max_mutation_value = 1
-
-    population = B.randint(0, max_gene_value, pop_shape)
-
-    OP = RandomMutations2D(population_fraction=population_fraction,
-                           mutations_probability=mutations_probability,
-                           min_gene_value=min_gene_value,
-                           max_gene_value=max_gene_value,
-                           min_mutation_value=min_mutation_value,
-                           max_mutation_value=max_mutation_value)
 
     chromosomes_sav = copy(population)
     cprint('[Initial genepool]', 'blue')
     cprint(chromosomes_sav, 'blue')
-    population = OP(population)
+    population = RM(population)
 
     cprint('\n[Mutated genepool]', 'yellow')
     cprint(population, 'yellow')

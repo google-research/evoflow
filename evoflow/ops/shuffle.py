@@ -40,13 +40,7 @@ class Shuffle(OP):
         self.population_fraction = population_fraction
         super(Shuffle, self).__init__(**kwargs)
 
-    def call(self, populations):
-        results = []
-        for population in populations:
-            results.append(self.compute(population))
-        return results
-
-    def compute(self, population):
+    def call(self, population):
 
         # shuffle to make sure  don't hit the same everytime
         if not self.debug:

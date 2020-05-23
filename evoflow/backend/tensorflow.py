@@ -19,6 +19,14 @@ from .common import _infer_dtype
 from evoflow.config import intx, floatx
 import numpy
 
+# - tf specific functions
+# ! don't import them in __init__
+
+
+def get_num_gpu():
+    "Return the number of GPU available to Tensorflow"
+    return len(tf.config.get_visible_devices('GPU'))
+
 
 # -initialization-
 def tensor(a, dtype=None):

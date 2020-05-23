@@ -54,13 +54,7 @@ class Reverse(OP):
         self.slices = None
         super(Reverse, self).__init__(**kwargs)
 
-    def call(self, populations):
-        results = []
-        for population in populations:
-            results.append(self.compute(population))
-        return results
-
-    def compute(self, population):
+    def call(self, population):
 
         if not self.debug:
             population = B.shuffle(population)

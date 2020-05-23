@@ -53,13 +53,7 @@ class UniformCrossover(OP):
         self.mutation_shape = []
         super(UniformCrossover, self).__init__(**kwargs)
 
-    def call(self, populations):
-        results = []
-        for population in populations:
-            results.append(self.compute(population))
-        return results
-
-    def compute(self, population):
+    def call(self, population):
 
         # mix genomes
         population_copy = B.copy(population)

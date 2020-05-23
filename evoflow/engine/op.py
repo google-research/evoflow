@@ -19,6 +19,7 @@ from time import time
 from evoflow.utils import box, unbox
 from evoflow.io import print_debug
 from evoflow import backend as B
+from evoflow.config import get_backend
 
 
 class OP(object):
@@ -30,19 +31,46 @@ class OP(object):
         self.op_type = self.__class__.__name__
         self.idx = kwargs.get('name', self._gen_name())
         self.debug = kwargs.get('debug', False)
+        # by default go as fast as possible
+        self.OPTIMIZE = kwargs.get('optimize', True)
+
+        # warm the user so there is no surprise
+        if not self.OPTIMIZE:
+            print('Optimizations disabled - execution will be slower')
 
         self.input_ops = []
         self.input_shapes = []  # track tensor size accross the ops.
 
+        # optimization flags. They are set by each op based on what they can do
+        # and what is the best way to call them. see dispatch()
+
+        self.TF_FN = False  # by default don't use tf.functinon
+        self.TF_XLA = False  # by default don't compile with XLA
+        self.CPU_THRESHOLD = 0  # by default don't send small population to CPU
+
+        # infered env flags needed to make dispatch decisions
+        self.TF = False  # by default we don't use any TF specific optimization
+        self.TF_GPU = 0  # by default don't have gpu
+
+        # check if we use TF and we use GPU
+        if get_backend() == 'tensorflow':
+            self.TF = True  # using TF so can enable specific optimization
+            from evoflow.backend.tensorflow import get_num_gpu
+            self.TF_GPU = get_num_gpu()  # using GPU so can enable GPU optim
+
+        # track execution type
+        self.EAGER = 1
+        self.GRAPH = 2
+
     @abc.abstractmethod
-    def call(self, chromosomes, **kwargs):
+    def call(self, population, **kwargs):
         """This is where the logic of the operation live.
 
         Args:
-            chromosomes (ndarrays): Tensor or list of tensors
+            population (ndarrays): Tensor
             **kwargs: Additional keyword arguments to be passed to `call()`.
         """
-        return chromosomes
+        return population
 
     def _gen_name(self):
         return self.op_type.lower() + "_" + self._gen_idx()
@@ -50,7 +78,42 @@ class OP(object):
     def _call_from_graph(self, populations):
         "Function called during graph executions"
         populations = box(populations)
-        return unbox(self.call(populations))
+        results = self.dispatch(populations, self.GRAPH)
+        return unbox(results)
+
+    def dispatch(self, populations, mode):
+        """Fan-out populations and call the most efficient compute method based
+        on what optimization the op support
+
+        Note: it is each OP responsability to set optimization flags at init
+        time so dispatch know if tf.function, xla etc should be used.
+
+        Args:
+            populations (list(tensors)): populations to apply the op to.
+            mode (int): Mode of operation in {EAGER, GRAPH}
+        Returns:
+            list(tensors): mutated populations
+        """
+
+        # FIXME: explore using a parallel map here
+        results = []
+        for population in populations:
+            # FIXME: this is where the optimizaiton selection
+            results.append(self.call(population))
+        return results
+        '''
+                if self.use_tf:
+            return self.compute_tf(population)
+        else:
+            return self.compute_cpu(population)
+
+    def compute_cpu(self, population):
+        return self._compute(population)
+
+    @tf.function(experimental_compile=True)
+    def compute_tf(self, population):
+        return self._compute(population)
+        '''
 
     def __call__(self, ops):
 
@@ -91,7 +154,7 @@ class OP(object):
             self.compute_output_shape(input_shapes)
 
             # compute concrete results
-            results = self.call(ops)
+            results = self.dispatch(ops, self.EAGER)
 
             # unbox result if needed
             return unbox(results)
