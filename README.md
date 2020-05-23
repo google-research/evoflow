@@ -20,7 +20,7 @@ Google Colab or it will just work fine on your CPU.
 ## Getting started in 30 seconds
 
 1. Install EvoFlow: `pip install evoflow`
-2. Head to our [hello world notebook](https://github.com/google-research/evoflow/blob/master/notebooks/maxone.ipynb) that will shows you how to use EvoFlow to solve the classic MaxOne problem.
+2. Head to our [hello world notebook](https://github.com/google-research/evoflow/blob/master/notebooks/onemax.ipynb) that will shows you how to use EvoFlow to solve the classic OneMax problem.
 
 ## Tutorials
 
@@ -28,7 +28,7 @@ The following tutorials are availables
 
 | Problem                 | Description                                                 | Key concepts showcased                                                                                                                                             |
 | ----------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| MaxOne                  | Maximize the number of ones in a chromosome                 | <ul><li>`EvoFlow` core API</li><li>`RandomMutation` OP</li><li> `UniformCrossOver` Op</li><li>Evolution model construction</li><li>`Results` basic usage</li></ul> |
+| OneMax                  | Maximize the number of ones in a chromosome                 | <ul><li>`EvoFlow` core API</li><li>`RandomMutation` OP</li><li> `UniformCrossOver` Op</li><li>Evolution model construction</li><li>`Results` basic usage</li></ul> |
 | Travel Salesman problem | Visit each city once while minimizing the distance traveled | <ul><li>Custom `Fitness function`</li><li>Genes permuting Ops: `Shuffle` and `Reverse`</li><li>Evolution model programatic construction</li></ul>                  |
 
 Genetic Algorithm are used to solve a [wide variety of problems](https://en.wikipedia.org/wiki/List_of_genetic_algorithm_applications)
