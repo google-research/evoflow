@@ -73,6 +73,10 @@ class RandomMutations(OP):
         self.use_tf = use_tf
         super(RandomMutations, self).__init__(**kwargs)
 
+        # specifiy which optimization are available and useful.
+        self.TF_FN = True  # support tf.function and needs it
+        self.TF_XLA = True  # support XLA compile and needs it
+
     def call(self, population):
 
         # three tensors:
@@ -202,7 +206,7 @@ class RandomMutations3D(RandomMutations):
 
 if __name__ == '__main__':
     from copy import copy
-    from time import time
+    from perfcounters import PerfCounters
     pop_shape = (100, 100, 100)
     max_gene_value = 10
     min_gene_value = 0
@@ -219,23 +223,39 @@ if __name__ == '__main__':
                            max_gene_value=max_gene_value,
                            min_mutation_value=min_mutation_value,
                            max_mutation_value=max_mutation_value,
-                           optimize=False)
+                           optimization_level=0)
 
     TF_RM = RandomMutations2D(population_fraction=population_fraction,
                               mutations_probability=mutations_probability,
                               min_gene_value=min_gene_value,
                               max_gene_value=max_gene_value,
                               min_mutation_value=min_mutation_value,
-                              max_mutation_value=max_mutation_value)
+                              max_mutation_value=max_mutation_value,
+                              optimization_level=1)
+
+    XLA_RM = RandomMutations2D(population_fraction=population_fraction,
+                               mutations_probability=mutations_probability,
+                               min_gene_value=min_gene_value,
+                               max_gene_value=max_gene_value,
+                               min_mutation_value=min_mutation_value,
+                               max_mutation_value=max_mutation_value,
+                               optimization_level=2)
+
     TF_RM(population)
+    XLA_RM(population)
 
-    start = time()
-    RM(population)
-    print('optimize=false time', time() - start)
-    start = time()
-    population = TF_RM(population)
-    print('optimize=true time', time() - start)
+    cprint('[RandomMutation micro benchmark]', 'yellow')
 
+    ops = [RM, TF_RM, XLA_RM]
+    cnts = PerfCounters()
+    for idx, op in enumerate(ops):
+        cname = 'Optimization level: %d' % idx
+        cnts.start(cname)
+        for _ in range(3):
+            op(population)
+        cnts.stop(cname)
+    cnts.report()
+    quit()
     # display
     pop_shape = (6, 4, 4)
     max_gene_value = 10
