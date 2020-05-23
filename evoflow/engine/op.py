@@ -20,6 +20,7 @@ from evoflow.utils import box, unbox
 from evoflow.io import print_debug
 from evoflow import backend as B
 from evoflow.config import get_backend
+import tensorflow as tf
 
 
 class OP(object):
@@ -32,11 +33,13 @@ class OP(object):
         self.idx = kwargs.get('name', self._gen_name())
         self.debug = kwargs.get('debug', False)
         # by default go as fast as possible
-        self.OPTIMIZE = kwargs.get('optimize', True)
+        self.OPTIMIZE_LEVEL = kwargs.get('optimization_level', 2)
 
         # warm the user so there is no surprise
-        if not self.OPTIMIZE:
-            print('Optimizations disabled - execution will be slower')
+        if not self.OPTIMIZE_LEVEL:
+            print('Optimization are disabled - execution will be slower')
+        elif self.OPTIMIZE_LEVEL == 1:
+            print('Some optimization are disabled - execution will be slower')
 
         self.input_ops = []
         self.input_shapes = []  # track tensor size accross the ops.
@@ -95,25 +98,40 @@ class OP(object):
             list(tensors): mutated populations
         """
 
+        self.print_debug('TF', self.TF, 'TF_GPU', self.TF_GPU, 'TF_FN',
+                         self.TF_FN, 'TF_XLA', self.TF_XLA, 'Optimize',
+                         self.OPTIMIZE_LEVEL)
+        # optimization disabled or not tensorflow
+        if not self.OPTIMIZE_LEVEL or not self.TF:
+            self.print_debug('Optimization disabled or no TF')
+            fn = self.call
+        else:
+            if self.TF_XLA and self.OPTIMIZE_LEVEL >= 2:
+                self.print_debug('XLA acceleration')
+                fn = self.tf_xla_call
+            elif self.TF_FN:
+                self.print_debug('TF_FN acceleration')
+                fn = self.tf_call
+            else:
+                self.print_debug('No optimization exist for this op')
+                fn = self.call
+
+            # FIXME: add GPU versus CPU placement here (inside the else)
+
         # FIXME: explore using a parallel map here
         results = []
         for population in populations:
-            # FIXME: this is where the optimizaiton selection
-            results.append(self.call(population))
+            # no optimization
+            results.append(fn(population))
         return results
-        '''
-                if self.use_tf:
-            return self.compute_tf(population)
-        else:
-            return self.compute_cpu(population)
 
-    def compute_cpu(self, population):
-        return self._compute(population)
+    @tf.function()
+    def tf_call(self, population):
+        return self.call(population)
 
     @tf.function(experimental_compile=True)
-    def compute_tf(self, population):
-        return self._compute(population)
-        '''
+    def tf_xla_call(self, population):
+        return self.call(population)
 
     def __call__(self, ops):
 
