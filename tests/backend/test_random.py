@@ -24,6 +24,24 @@ def arr2dlarge():
             [7, 8, 9, 16, 17, 18]]
 
 
+def test_full_shuffle_shape(backends):
+    # use arrays where each dimension is different to make sure we get back
+    # the same. This might seems odd but there is a real risk it is broken
+    # due to how the tf.op is implemented
+    from evoflow.config import get_backend
+    SHAPES = [(10, ), (10, 20), (20, 10), (10, 20, 30), (30, 10, 20),
+              (10, 20, 30, 40), (40, 30, 20, 10)]
+
+    for B in backends:
+        print('\n==[Backend]==\n')
+        for shape in SHAPES:
+            t = B.normal(shape)
+            assert t.shape == shape
+            t = B.full_shuffle(t)
+            assert t.shape == shape
+            print('shape', shape, 't.shape', t.shape)
+
+
 def test_shuffle_axis0(backends):
     for B in backends:
         t = B.tensor(arr2d())

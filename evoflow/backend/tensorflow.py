@@ -645,18 +645,89 @@ def full_shuffle(t):
 
 
     Returns:
-        None: in place shuffling
+        tensor: shuffled tensor
+
+
+    We need to use transpose
+
+    Shuffle()
+
+    2D
+    [1, 0] -> [1, 0] : Dim 1
+    [1, 0] -> [0, 1] : restore order
+
+    3D
+    Transpose -> new order
+    [1, 0, 2] -> [1, 0, 2]  : Dim 1
+    [2, 1, 0] -> [2, 0, 1]  : Dim 2
+    [1, 2, 0] -> [0, 1, 2]  : restore order
+
+    4D
+    Transpose -> new order
+    [1, 0, 2, 3] -> [1, 0, 2, 3]  : Dim 1
+    [2, 1, 0, 3] -> [2, 0, 1, 3]  : Dim 2
+    [3, 1, 2, 0] -> [3, 0, 1, 2]  : Dim 3
+    [1, 2, 3, 0] -> [0, 1, 2, 3]  : restore order
+
+    5D+
+    nope - might consider patching tf.shuffle at that point :)
 
     """
     # ! dont use the variable name tensor as it confusion with the tensor()
-    # ! function
 
+    dims = len(t.shape)
+
+    t = tf.random.shuffle(t)  # always shuffle dim0
+    if dims == 2:
+
+        # dim 1
+        t = tf.transpose(t, [1, 0])
+        t = tf.random.shuffle(t)
+
+        # restore
+        t = tf.transpose(t, [1, 0])
+
+    elif dims == 3:
+
+        # dim 1
+        t = tf.transpose(t, [1, 0, 2])
+        t = tf.random.shuffle(t)
+
+        # dim 2
+        t = tf.transpose(t, [2, 1, 0])
+        t = tf.random.shuffle(t)
+
+        # restore
+        t = tf.transpose(t, [1, 2, 0])
+
+    elif dims == 4:
+
+        # dim 1
+        t = tf.transpose(t, [1, 0, 2, 3])
+        t = tf.random.shuffle(t)
+
+        # dim 2
+        t = tf.transpose(t, [2, 1, 0, 3])
+        t = tf.random.shuffle(t)
+
+        # dim 3
+        t = tf.transpose(t, [3, 1, 2, 0])
+        t = tf.random.shuffle(t)
+
+        # restore
+        t = tf.transpose(t, [1, 2, 3, 0])
+
+    elif dims > 4:
+        print('tensor shape', t.shape)
+        raise ValueError('Tensor Rank > 4 -- not implemented')
+
+    return t
     # FIXME: its a hack as we use numpy which is liklely to cause slowness
-    t = as_numpy_array(t)
-    rng = numpy.random.default_rng()
-    for idx in range(len(t.shape)):
-        rng.shuffle(t, axis=idx)
-    return tensor(t)
+    # t = as_numpy_array(t)
+    # rng = numpy.random.default_rng()
+    # for idx in range(len(t.shape)):
+    #     rng.shuffle(t, axis=idx)
+    # return tensor(t)
 
 
 # - Indexing -
