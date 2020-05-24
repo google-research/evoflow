@@ -14,7 +14,6 @@
 
 from evoflow.engine import OP
 from evoflow import backend as B
-from termcolor import cprint
 
 
 class RandomMutations(OP):
@@ -207,6 +206,7 @@ class RandomMutations3D(RandomMutations):
 if __name__ == '__main__':
     from copy import copy
     from perfcounters import PerfCounters
+    from termcolor import cprint
     pop_shape = (100, 100, 100)
     max_gene_value = 10
     min_gene_value = 0
@@ -217,7 +217,7 @@ if __name__ == '__main__':
 
     population = B.randint(0, max_gene_value, pop_shape)
 
-    RM = RandomMutations2D(population_fraction=population_fraction,
+    OP = RandomMutations2D(population_fraction=population_fraction,
                            mutations_probability=mutations_probability,
                            min_gene_value=min_gene_value,
                            max_gene_value=max_gene_value,
@@ -225,7 +225,7 @@ if __name__ == '__main__':
                            max_mutation_value=max_mutation_value,
                            optimization_level=0)
 
-    TF_RM = RandomMutations2D(population_fraction=population_fraction,
+    TF_OP = RandomMutations2D(population_fraction=population_fraction,
                               mutations_probability=mutations_probability,
                               min_gene_value=min_gene_value,
                               max_gene_value=max_gene_value,
@@ -233,7 +233,7 @@ if __name__ == '__main__':
                               max_mutation_value=max_mutation_value,
                               optimization_level=1)
 
-    XLA_RM = RandomMutations2D(population_fraction=population_fraction,
+    XLA_OP = RandomMutations2D(population_fraction=population_fraction,
                                mutations_probability=mutations_probability,
                                min_gene_value=min_gene_value,
                                max_gene_value=max_gene_value,
@@ -241,12 +241,13 @@ if __name__ == '__main__':
                                max_mutation_value=max_mutation_value,
                                optimization_level=2)
 
-    TF_RM(population)
-    XLA_RM(population)
+    # warmup
+    TF_OP(population)
+    XLA_OP(population)
 
-    cprint('[RandomMutation micro benchmark]', 'yellow')
+    cprint('[%s micro benchmark]' % str(OP.__class__.__name__), 'yellow')
 
-    ops = [RM, TF_RM, XLA_RM]
+    ops = [OP, TF_OP, XLA_OP]
     cnts = PerfCounters()
     for idx, op in enumerate(ops):
         cname = 'Optimization level: %d' % idx
