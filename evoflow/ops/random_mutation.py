@@ -16,13 +16,12 @@ from evoflow.utils import slices2array
 from evoflow.engine import OP
 from evoflow import backend as B
 from termcolor import cprint
-from evoflow.utils import micro_op_bench
 
 
 class RandomMutations(OP):
 
-    O_AUTOGRAPH = 1
-    O_XLA = 0
+    O_AUTOGRAPH = False
+    O_XLA = False
 
     def __init__(self,
                  population_fraction,
@@ -203,7 +202,8 @@ class RandomMutations3D(RandomMutations):
 
 if __name__ == '__main__':
     from copy import copy
-    NUM_RUNS = 20
+    from evoflow.utils import op_optimization_benchmark
+    NUM_RUNS = 10
     pop_shape = (100, 100, 10)
     max_gene_value = 10
     min_gene_value = 0
@@ -222,7 +222,7 @@ if __name__ == '__main__':
         min_mutation_value=min_mutation_value,
         max_mutation_value=max_mutation_value,
     )
-    micro_op_bench(population, OP, NUM_RUNS)
+    op_optimization_benchmark(population, OP, NUM_RUNS).report()
     quit()
     # display
     pop_shape = (6, 4, 4)
