@@ -65,15 +65,14 @@ class Shuffle(OP):
 
 if __name__ == '__main__':
     from copy import copy
-    from evoflow.utils import micro_op_bench
+    from evoflow.utils import op_optimization_benchmark
     NUM_RUNS = 10
     pop_shape = (1000, 1000, 100)
     population = B.randint(0, 256, pop_shape)
     population_fraction = 0.5
 
     OP = Shuffle(population_fraction)
-    micro_op_bench(population, OP, NUM_RUNS)
-
+    op_optimization_benchmark(population, OP, NUM_RUNS).report()
     quit()
 
     GENOME_SHAPE = (6, 4, 4)
