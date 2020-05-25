@@ -15,11 +15,13 @@
 from evoflow.utils import slices2array
 from evoflow.engine import OP
 from evoflow import backend as B
-from evoflow.backend.tf_ops.randint import randint2
-import tensorflow as tf
 
 
 class UniformCrossover(OP):
+
+    O_AUTOGRAPH = False
+    O_XLA = False
+
     def __init__(self, population_fraction, max_crossover_probability,
                  **kwargs):
         """Perform uniform crossovers on a given population.
@@ -54,11 +56,6 @@ class UniformCrossover(OP):
         self.max_crossover_probability = max_crossover_probability
         super(UniformCrossover, self).__init__(**kwargs)
 
-        # Turning on supported optimizations
-        self.enable_autograph(True)
-        self.enable_xla_compilation(True)
-        self.generator = tf.random.Generator.from_non_deterministic_state()
-
     def call(self, population):
 
         # mix genomes
@@ -81,8 +78,8 @@ class UniformCrossover(OP):
         mutations_shape = [num_crossovers]
         for idx, frac in enumerate(self.max_crossover_probability):
             max_genes = int(population.shape[idx + 1] * frac + 1)
-            # num_genes = randint2(self.generator, 1, high=max_genes)
-            mutations_shape.append(max_genes)
+            num_genes = B.randint(1, high=max_genes)
+            mutations_shape.append(num_genes)
         self.print_debug("mutation_shape: %s" % mutations_shape)
 
         # create tensor
@@ -156,44 +153,19 @@ class UniformCrossover3D(UniformCrossover):
 
 if __name__ == '__main__':
     from copy import copy
-    from perfcounters import PerfCounters
     from termcolor import cprint
-    # NUM_TESTS = 10
-    # pop_shape = (100, 100, 100)
-    # population = B.randint(0, 256, pop_shape)
-    # population_fraction = 0.5
-    # max_reverse_probability = (0.5, 0.5)
+    from evoflow.utils import op_optimization_benchmark
 
-    # OP = UniformCrossover2D(population_fraction,
-    #                         max_reverse_probability,
-    #                         optimization_level=0)
+    NUM_RUNS = 3
+    pop_shape = (100, 100, 100)
+    population = B.randint(0, 256, pop_shape)
+    population_fraction = 0.5
+    max_reverse_probability = (0.5, 0.5)
 
-    # TF_OP = UniformCrossover2D(population_fraction,
-    #                            max_reverse_probability=max_reverse_probability,
-    #                            optimization_level=1)
+    OP = UniformCrossover2D(population_fraction, max_reverse_probability)
+    op_optimization_benchmark(population, OP, NUM_RUNS).report()
+    quit()
 
-    # XLA_OP = UniformCrossover2D(population_fraction,
-    #                             max_reverse_probability,
-    #                             optimization_level=2)
-
-    # # warmup
-    # for _ in range(3):
-    #     OP(population)
-    #     TF_OP(population)
-    #     XLA_OP(population)
-
-    # cprint('[%s micro benchmark]' % str(OP.__class__.__name__), 'yellow')
-
-    # ops = [OP, TF_OP, XLA_OP]
-    # cnts = PerfCounters()
-    # for idx, op in enumerate(ops):
-    #     cname = 'Optimization level: %d' % idx
-    #     cnts.start(cname)
-    #     for _ in range(NUM_TESTS):
-    #         op(population)
-    #     cnts.stop(cname)
-    # cnts.report()
-    # quit()
     GENOME_SHAPE = (6, 4, 4)
     population = B.randint(0, 100, GENOME_SHAPE)
     population_fraction = 0.5
