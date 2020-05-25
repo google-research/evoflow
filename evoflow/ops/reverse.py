@@ -157,19 +157,19 @@ class Reverse3D(Reverse):
 if __name__ == '__main__':
     from copy import copy
     from termcolor import cprint
-    from evoflow.utils import micro_op_bench
+    from evoflow.utils import op_optimization_benchmark
 
-    NUM_TESTS = 60  # 100
+    NUM_RUNS = 3  # 100
     # pop_shape = (100, 100, 100)
-    pop_shape = (100, 10, 10)
+    pop_shape = (100, 100, 100)
     population = B.randint(0, 256, pop_shape)
     population_fraction = 0.5
     max_reverse_probability = (0.5, 0.5)
 
-    #bench
     OP = Reverse2D(population_fraction, max_reverse_probability)
-    micro_op_bench(population, OP, NUM_TESTS)
+    op_optimization_benchmark(population, OP, NUM_RUNS).report()
     quit()
+
     GENOME_SHAPE = (6, 4)
     population = B.randint(0, 256, GENOME_SHAPE)
     population_fraction = 0.5
