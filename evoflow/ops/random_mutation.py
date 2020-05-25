@@ -12,11 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from evoflow.utils import slices2array
 from evoflow.engine import OP
 from evoflow import backend as B
+from termcolor import cprint
+from evoflow.utils import micro_op_bench
 
 
 class RandomMutations(OP):
+
+    O_AUTOGRAPH = 1
+    O_XLA = 0
+
     def __init__(self,
                  population_fraction,
                  mutations_probability,
@@ -24,7 +31,6 @@ class RandomMutations(OP):
                  max_gene_value=None,
                  min_mutation_value=1,
                  max_mutation_value=1,
-                 use_tf=False,
                  **kwargs):
         """Perform random mutations
 
@@ -69,59 +75,51 @@ class RandomMutations(OP):
         self.max_gene_value = max_gene_value
         self.min_mutation_value = min_mutation_value
         self.max_mutation_value = max_mutation_value
-        self.use_tf = use_tf
         super(RandomMutations, self).__init__(**kwargs)
 
-        # specifiy which optimization are available and useful.
-        self.TF_FN = True  # support tf.function and needs it
-        self.TF_XLA = True  # support XLA compile and needs it
-
     def call(self, population):
+        """ Create the mask use to generate mutations
 
-        # three tensors:
-        # m1 mutations + padding (affected population)
-        # m2 = m1 + zero() (population size)
+        Args:
+            population_shape (list): population tensor shape.
+        Returns:
+            tensor: mask
+
+        Generation works by:
+        1. creating a slice that contains the mutation
+        2. Inserting it into the mask
+        3. Shuffle the mask in every dimension to distribute them
+        """
         affected_population = int(population.shape[0] *
                                   self.population_fraction)
-        self.print_debug('affected_population', affected_population)
-        # compute number of mutation
-        mask_shape = [affected_population]
-        num_mutations = affected_population
-        total_size = affected_population
-        for idx, dim_size in enumerate(population.shape[1:]):
-            midx = idx - 1  # recall dimension 0 is the population
-            mask_shape.append(dim_size)
-            total_size *= dim_size
 
-            # how many mutation
-            dim_mutations = int(dim_size * self.mutations_probability[midx])
-            num_mutations *= dim_mutations
+        # Build sub tensors & slices by iterating through tensor dimensions
+        sub_tensor_shape = [affected_population]
+        slices = [slice(0, affected_population)]
+        for idx, pop_size in enumerate(population.shape[1:]):
+            midx = idx - 1  # recall dim1 are genes.
+            max_genes = int(pop_size * self.mutations_probability[midx] + 1)
+            num_genes = B.randint(1, high=max_genes)
+            sub_tensor_shape.append(num_genes)
+            slices.append(slice(0, num_genes))
+        slices = tuple(slices)
+        tslices = slices2array(slices)
+        self.print_debug("sub_tensor_shape", sub_tensor_shape)
 
-        # draw mutations
+        # drawing mutations
         mutations = B.randint(self.min_mutation_value,
                               self.max_mutation_value + 1,
-                              shape=(num_mutations))
-        self.print_debug('mutations shape', mutations.shape)
+                              shape=sub_tensor_shape)
+        # blank mask
+        mask = B.zeros(population.shape, dtype=mutations.dtype)
 
-        # padding of zero for the affect population
-        padding_size = total_size - num_mutations
-        non_mutations = B.zeros((padding_size), dtype=population.dtype)
-        self.print_debug('non mutations', non_mutations.shape)
+        # add mutations
+        # print('mtuation', mutations.dtype)
+        # print('mask', mask.dtype)
+        mask = B.assign(mask, mutations, tslices)
 
-        # construct the mask
-        self.print_debug('mask shape', mask_shape)
-        mask = B.concatenate([mutations, non_mutations])
-        mask = B.shuffle(mask)
-        mask = B.reshape(mask, shape=mask_shape)
-        self.print_debug('mutation mask', mask)
-
-        # extra padding to match population size if needed
-        non_affected_population = population.shape[0] - affected_population
-        if non_affected_population:
-            padding_size = [non_affected_population]
-            padding_size.extend([x for x in population.shape[1:]])
-            padding = B.zeros((padding_size), dtype=population.dtype)
-            mask = B.concatenate([mask, padding])
+        # shuffle mask every axis
+        mask = B.full_shuffle(mask)
 
         # mutate
         population = population + mask
@@ -205,9 +203,8 @@ class RandomMutations3D(RandomMutations):
 
 if __name__ == '__main__':
     from copy import copy
-    from perfcounters import PerfCounters
-    from termcolor import cprint
-    pop_shape = (100, 100, 100)
+    NUM_RUNS = 20
+    pop_shape = (100, 100, 10)
     max_gene_value = 10
     min_gene_value = 0
     population_fraction = 1
@@ -217,45 +214,15 @@ if __name__ == '__main__':
 
     population = B.randint(0, max_gene_value, pop_shape)
 
-    OP = RandomMutations2D(population_fraction=population_fraction,
-                           mutations_probability=mutations_probability,
-                           min_gene_value=min_gene_value,
-                           max_gene_value=max_gene_value,
-                           min_mutation_value=min_mutation_value,
-                           max_mutation_value=max_mutation_value,
-                           optimization_level=0)
-
-    TF_OP = RandomMutations2D(population_fraction=population_fraction,
-                              mutations_probability=mutations_probability,
-                              min_gene_value=min_gene_value,
-                              max_gene_value=max_gene_value,
-                              min_mutation_value=min_mutation_value,
-                              max_mutation_value=max_mutation_value,
-                              optimization_level=1)
-
-    XLA_OP = RandomMutations2D(population_fraction=population_fraction,
-                               mutations_probability=mutations_probability,
-                               min_gene_value=min_gene_value,
-                               max_gene_value=max_gene_value,
-                               min_mutation_value=min_mutation_value,
-                               max_mutation_value=max_mutation_value,
-                               optimization_level=2)
-
-    # warmup
-    TF_OP(population)
-    XLA_OP(population)
-
-    cprint('[%s micro benchmark]' % str(OP.__class__.__name__), 'yellow')
-
-    ops = [OP, TF_OP, XLA_OP]
-    cnts = PerfCounters()
-    for idx, op in enumerate(ops):
-        cname = 'Optimization level: %d' % idx
-        cnts.start(cname)
-        for _ in range(3):
-            op(population)
-        cnts.stop(cname)
-    cnts.report()
+    OP = RandomMutations2D(
+        population_fraction=population_fraction,
+        mutations_probability=mutations_probability,
+        min_gene_value=min_gene_value,
+        max_gene_value=max_gene_value,
+        min_mutation_value=min_mutation_value,
+        max_mutation_value=max_mutation_value,
+    )
+    micro_op_bench(population, OP, NUM_RUNS)
     quit()
     # display
     pop_shape = (6, 4, 4)

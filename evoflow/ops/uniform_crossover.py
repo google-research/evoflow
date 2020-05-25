@@ -12,21 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from termcolor import cprint
+from evoflow.utils import slices2array
 from evoflow.engine import OP
 from evoflow import backend as B
+from evoflow.backend.tf_ops.randint import randint2
+import tensorflow as tf
 
 
 class UniformCrossover(OP):
-    def __init__(self, population_fraction, crossover_probability, **kwargs):
+    def __init__(self, population_fraction, max_crossover_probability,
+                 **kwargs):
         """Perform uniform crossovers on a given population.
 
         Args:
             population_fraction (float): How many chromosomes
             should have a cross-over.
 
-            crossover_probability (list(float)): What fraction of the
-            gene should be affected by crossovers.
+            max_crossover_probability (list(float)):  What is the maximum
+            fraction of the genes that will be affected by the crossover.
 
             debug (bool, optional): print debug information and function
             returns additional data.
@@ -41,17 +44,20 @@ class UniformCrossover(OP):
         if not (0 < population_fraction <= 1.0):
             raise ValueError("population_fraction must be in ]0. 1]")
 
-        for val in crossover_probability:
+        for val in max_crossover_probability:
             if not (0 < val <= 1.0):
                 raise ValueError(
-                    "values in crossover_probability must be between ]0. 1]")
+                    "values in max_crossover_probability must be between ]0. 1]"
+                )
 
         self.population_fraction = population_fraction
-        self.crossover_probability = crossover_probability
-        self.x_matrix = None
-        self.has_cache = False
-        self.mutation_shape = []
+        self.max_crossover_probability = max_crossover_probability
         super(UniformCrossover, self).__init__(**kwargs)
+
+        # Turning on supported optimizations
+        self.enable_autograph(True)
+        self.enable_xla_compilation(True)
+        self.generator = tf.random.Generator.from_non_deterministic_state()
 
     def call(self, population):
 
@@ -65,46 +71,42 @@ class UniformCrossover(OP):
         self.print_debug("num_crossovers %s" % num_crossovers)
 
         # crossover matrix
-        if not self.has_cache:
-            self.print_debug("Creating x_matrix and mutation_matrix")
-            self.has_cache = True
-            self.x_matrix = B.zeros(population.shape, dtype=B.intx())
+        x_matrix = B.zeros(population.shape, dtype=B.intx())
+        self.print_debug("Creating x_matrix and mutation_matrix")
 
-            # We need to accounting for the fact that the population
-            # can be of rank N which makes the fancy indexing painful.
-            # we need a shape for the mutation which is this:
-            # [num_crossover, num_mutation, ..., num_mutations]
-            mutations_shape = [num_crossovers]
-            for idx, frac in enumerate(self.crossover_probability):
-                num_genes = int(self.x_matrix.shape[idx + 1] * frac)
-                mutations_shape.append(num_genes)
-            self.print_debug("mutation_shape: %s" % mutations_shape)
-            self.mutation_shape = mutations_shape
+        # We need to accounting for the fact that the population
+        # can be of rank N which makes the fancy indexing painful.
+        # we need a shape for the mutation which is this:
+        # [num_crossover, num_mutation, ..., num_mutations]
+        mutations_shape = [num_crossovers]
+        for idx, frac in enumerate(self.max_crossover_probability):
+            max_genes = int(population.shape[idx + 1] * frac + 1)
+            # num_genes = randint2(self.generator, 1, high=max_genes)
+            mutations_shape.append(max_genes)
+        self.print_debug("mutation_shape: %s" % mutations_shape)
 
-            # create tensor
-            mutations = B.ones(mutations_shape)
+        # create tensor
+        mutations = B.ones(mutations_shape, dtype=B.intx())
 
-            # compute the fancy indexing dynamically
-            slices = []
-            for size in mutations_shape:
-                slices.append(slice(0, size))
-            slices = tuple(slices)
+        # compute the fancy indexing dynamically
+        slices = []
+        for size in mutations_shape:
+            slices.append(slice(0, size))
+        slices = tuple(slices)
+        tslices = slices2array(slices)
 
-            # injecting mutations
-            self.x_matrix = B.assign(self.x_matrix, mutations, slices)
-        else:
-            self.print_debug("Using cached matrix")
-
-        self.x_matrix = B.full_shuffle(self.x_matrix)
+        # injecting mutations
+        x_matrix = B.assign(x_matrix, mutations, tslices)
+        x_matrix = B.full_shuffle(x_matrix)
 
         # invert crossover matrix
-        inv_x_matrix = B.abs((self.x_matrix) - 1)
+        inv_x_matrix = B.abs((x_matrix) - 1)
 
         # copy chromosomes that stays the same
         population = population * inv_x_matrix
 
         # add the mutations
-        population += (population_copy * self.x_matrix)
+        population += (population_copy * x_matrix)
 
         return population
 
@@ -112,49 +114,88 @@ class UniformCrossover(OP):
 class UniformCrossover1D(UniformCrossover):
     def __init__(self,
                  population_fraction=0.9,
-                 crossover_probability=0.2,
+                 max_crossover_probability=0.2,
                  **kwargs):
-        if not isinstance(crossover_probability, float):
-            raise ValueError('crossover_probability must be a float')
+        if not isinstance(max_crossover_probability, float):
+            raise ValueError('max_crossover_probability must be a float')
 
-        super(UniformCrossover1D,
-              self).__init__(population_fraction=population_fraction,
-                             crossover_probability=[crossover_probability],
-                             **kwargs)
+        super(UniformCrossover1D, self).__init__(
+            population_fraction=population_fraction,
+            max_crossover_probability=[max_crossover_probability],
+            **kwargs)
 
 
 class UniformCrossover2D(UniformCrossover):
     def __init__(self,
                  population_fraction=0.9,
-                 crossover_probability=(0.2, 0.2),
+                 max_crossover_probability=(0.2, 0.2),
                  **kwargs):
 
-        if len(crossover_probability) != 2:
-            raise ValueError('crossover_size_fraction must be of form (x, y)')
-        super(UniformCrossover2D,
-              self).__init__(population_fraction=population_fraction,
-                             crossover_probability=crossover_probability,
-                             **kwargs)
+        if len(max_crossover_probability) != 2:
+            raise ValueError(
+                'max_crossover_probability must be of form (x, y)')
+        super(UniformCrossover2D, self).__init__(
+            population_fraction=population_fraction,
+            max_crossover_probability=max_crossover_probability,
+            **kwargs)
 
 
 class UniformCrossover3D(UniformCrossover):
     def __init__(self,
                  population_fraction=0.9,
-                 crossover_probability=(0.2, 0.2, 0.2),
+                 max_crossover_probability=(0.2, 0.2, 0.2),
                  **kwargs):
-        if len(crossover_probability) != 3:
+        if len(max_crossover_probability) != 3:
             raise ValueError(
-                'crossover_probability must be of form (x, y, z)')  # noqa
-        super(UniformCrossover3D,
-              self).__init__(population_fraction=population_fraction,
-                             crossover_probability=crossover_probability,
-                             **kwargs)
+                'max_crossover_probability must be of form (x, y, z)')  # noqa
+        super(UniformCrossover3D, self).__init__(
+            population_fraction=population_fraction,
+            max_crossover_probability=max_crossover_probability,
+            **kwargs)
 
 
 if __name__ == '__main__':
     from copy import copy
-    GENOME_SHAPE = (10, 4, 4)
-    population = B.randint(0, 1024, GENOME_SHAPE)
+    from perfcounters import PerfCounters
+    from termcolor import cprint
+    # NUM_TESTS = 10
+    # pop_shape = (100, 100, 100)
+    # population = B.randint(0, 256, pop_shape)
+    # population_fraction = 0.5
+    # max_reverse_probability = (0.5, 0.5)
+
+    # OP = UniformCrossover2D(population_fraction,
+    #                         max_reverse_probability,
+    #                         optimization_level=0)
+
+    # TF_OP = UniformCrossover2D(population_fraction,
+    #                            max_reverse_probability=max_reverse_probability,
+    #                            optimization_level=1)
+
+    # XLA_OP = UniformCrossover2D(population_fraction,
+    #                             max_reverse_probability,
+    #                             optimization_level=2)
+
+    # # warmup
+    # for _ in range(3):
+    #     OP(population)
+    #     TF_OP(population)
+    #     XLA_OP(population)
+
+    # cprint('[%s micro benchmark]' % str(OP.__class__.__name__), 'yellow')
+
+    # ops = [OP, TF_OP, XLA_OP]
+    # cnts = PerfCounters()
+    # for idx, op in enumerate(ops):
+    #     cname = 'Optimization level: %d' % idx
+    #     cnts.start(cname)
+    #     for _ in range(NUM_TESTS):
+    #         op(population)
+    #     cnts.stop(cname)
+    # cnts.report()
+    # quit()
+    GENOME_SHAPE = (6, 4, 4)
+    population = B.randint(0, 100, GENOME_SHAPE)
     population_fraction = 0.5
     crossover_probability = (0.5, 0.5)
 
@@ -163,10 +204,11 @@ if __name__ == '__main__':
     original_population = copy(population)
     population = UniformCrossover2D(population_fraction,
                                     crossover_probability)(population)
-
+    print(population)
     # diff matrix
     diff = B.clip(abs(population - original_population), 0, 1)
     print(diff)
+    quit()
     # expected mutated chromosomes
     expected_mutated = population.shape[0] * population_fraction
     cprint(

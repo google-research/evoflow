@@ -19,8 +19,12 @@ from .common import _infer_dtype
 from evoflow.config import intx, floatx
 import numpy
 
+from evoflow.backend.tf_ops.assign import assign  # noqa: F401
+from evoflow.backend.tf_ops.assign import assign2  # noqa: F401
+
 # - tf specific functions
 # ! don't import them in __init__
+RAND_GENERATOR = tf.random.get_global_generator()
 
 
 def get_num_gpu():
@@ -114,7 +118,7 @@ def normal(shape, mean=0, stddev=1.0):
         ndarray: Drawn samples from the parameterized normal distribution.
 
     """
-    return tf.random.normal(shape, mean=mean, stddev=stddev)
+    return RAND_GENERATOR.normal(shape, mean=mean, stddev=stddev)
 
 
 def range(start, stop=None, step=1, dtype=intx()):
@@ -260,25 +264,6 @@ def roll(tensor, shift, axis):
     return tf.roll(tensor, shift, axis)
 
 
-def assign(dst_tensor, values, slices):
-    """ assign values in tensor at the position specified by the slices.
-
-    Args:
-        dst_tensor (ndarray): Target tensor
-        values (ndarray): Tensor containing the values to assign.
-        slices (tuple): slices that defines where to put the values.
-    Returns:
-        ndarray: tensor with the assigned values.
-
-    """
-    # FIXME: its a hack to get it to work, there must be a faster way.
-
-    dst_tensor = as_numpy_array(dst_tensor)
-    values = as_numpy_array(values)
-    dst_tensor[slices] = values
-    return tensor(dst_tensor)
-
-
 def tile(tensor, reps):
     """Construct a tensor by repeating tensor the number of times given by reps.
     Args:
@@ -346,8 +331,8 @@ def flatten(tensor):
     # note: unsure if that is the fastest way. maybe compute flat_shape in
     # pure python
 
-    flat_shape = prod(tensor.shape)
-    return tf.reshape(tensor, flat_shape)
+    # flat_shape = prod(tensor.shape)
+    return tf.reshape(tensor, [-1])
 
 
 def as_numpy_array(t):
@@ -584,7 +569,7 @@ def norm(tensor, ord='euclidean', axis=None, keepdims=False):
 # - Randomness -
 
 
-def randint(low, high=None, shape=None, dtype=intx()):
+def randint(low, high=0, shape=None, dtype=intx()):
     """Returns a scalar or an array of integer values over [low, high)
 
     Args:
@@ -608,11 +593,20 @@ def randint(low, high=None, shape=None, dtype=intx()):
 
     # just one number
     if not shape:
-        return numpy.random.randint(low, high=high)
+        if high == 0:
+            high = low
+            low = 0
+        return RAND_GENERATOR.uniform(shape=(1, ),
+                                      minval=low,
+                                      maxval=high,
+                                      dtype=intx())[0]
 
     if isinstance(shape, int):
         shape = (shape, )
-    return tf.random.uniform(shape=shape, minval=low, maxval=high, dtype=dtype)
+    return RAND_GENERATOR.uniform(shape=shape,
+                                  minval=low,
+                                  maxval=high,
+                                  dtype=dtype)
 
 
 def shuffle(t, axis=0):

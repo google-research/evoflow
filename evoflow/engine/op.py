@@ -16,10 +16,11 @@ import abc
 import random
 import hashlib
 from time import time
-from evoflow.utils import box, unbox
+from evoflow.utils import box, unbox, optimization_support
 from evoflow.io import print_debug
 from evoflow import backend as B
 from evoflow.config import get_backend
+
 import tensorflow as tf
 
 
@@ -33,13 +34,6 @@ class OP(object):
         self.idx = kwargs.get('name', self._gen_name())
         self.debug = kwargs.get('debug', False)
         # by default go as fast as possible
-        self.OPTIMIZE_LEVEL = kwargs.get('optimization_level', 2)
-
-        # warm the user so there is no surprise
-        if not self.OPTIMIZE_LEVEL:
-            print('Optimization are disabled - execution will be slower')
-        elif self.OPTIMIZE_LEVEL == 1:
-            print('Some optimization are disabled - execution will be slower')
 
         self.input_ops = []
         self.input_shapes = []  # track tensor size accross the ops.
@@ -47,9 +41,11 @@ class OP(object):
         # optimization flags. They are set by each op based on what they can do
         # and what is the best way to call them. see dispatch()
 
-        self.TF_FN = False  # by default don't use tf.functinon
-        self.TF_XLA = False  # by default don't compile with XLA
         self.CPU_THRESHOLD = 0  # by default don't send small population to CPU
+
+        # max optimization level
+        self.OPTIMIZE_LEVEL = 2  # default to max
+        self.set_optimization_level(kwargs.get('optimization_level', 2))
 
         # infered env flags needed to make dispatch decisions
         self.TF = False  # by default we don't use any TF specific optimization
@@ -64,6 +60,16 @@ class OP(object):
         # track execution type
         self.EAGER = 1
         self.GRAPH = 2
+
+    def set_optimization_level(self, level):
+        "Change optimization level"
+        self.OPTIMIZE_LEVEL = level
+
+        # warm the user so there is no surprise
+        if not self.OPTIMIZE_LEVEL:
+            print('Optimization are disabled - execution will be slower')
+        elif self.OPTIMIZE_LEVEL == 1:
+            print('Some optimization are disabled - execution will be slower')
 
     @abc.abstractmethod
     def call(self, population, **kwargs):
@@ -98,19 +104,24 @@ class OP(object):
             list(tensors): mutated populations
         """
 
-        self.print_debug('TF', self.TF, 'TF_GPU', self.TF_GPU, 'TF_FN',
-                         self.TF_FN, 'TF_XLA', self.TF_XLA, 'Optimize',
+        optim_support = optimization_support(self)
+        AUTOGRAPH = optim_support['optimizations']['autograph']
+        XLA = optim_support['optimizations']['xla']
+
+        self.print_debug('TF', self.TF, 'TF_GPU', self.TF_GPU, 'AUTOGRAPH',
+                         AUTOGRAPH, 'XLA', XLA, 'Requested level',
                          self.OPTIMIZE_LEVEL)
-        # optimization disabled or not tensorflow
+
         if not self.OPTIMIZE_LEVEL or not self.TF:
-            self.print_debug('Optimization disabled or no TF')
+            # cprint("no optim", 'green')
+            self.print_debug('Optimization disabled or not TF')
             fn = self.call
         else:
-            if self.TF_XLA and self.OPTIMIZE_LEVEL >= 2:
-                self.print_debug('XLA acceleration')
+            if XLA and self.OPTIMIZE_LEVEL >= 2:
+                self.print_debug('XLA optimizations')
                 fn = self.tf_xla_call
-            elif self.TF_FN:
-                self.print_debug('TF_FN acceleration')
+            elif AUTOGRAPH:
+                self.print_debug('AUTOGRAPH optimizations')
                 fn = self.tf_call
             else:
                 self.print_debug('No optimization exist for this op')

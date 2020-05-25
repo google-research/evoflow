@@ -12,12 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from termcolor import cprint
+from evoflow.utils import slices2array
 from evoflow.engine import OP
 from evoflow import backend as B
 
 
 class Reverse(OP):
+
+    O_AUTOGRAPH = True
+    O_XLA = False
+
     def __init__(self, population_fraction, max_reverse_probability, **kwargs):
         """Reverse part of the genes.
 
@@ -69,26 +73,30 @@ class Reverse(OP):
         mutations_shape = [num_reversed_chromosomes]
         for idx, frac in enumerate(self.max_reverse_probability):
             max_genes = int(population.shape[idx + 1] * frac + 1)
-            num_genes = B.randint(0, high=max_genes)
+            # ! not an error: reverse need at least 2 indices to make sense.
+            if max_genes > 2:
+                num_genes = B.randint(2, high=max_genes)
+            else:
+                num_genes = 2
             mutations_shape.append(num_genes)
             self.print_debug(idx, 'num_genes', num_genes, 'max', max_genes)
 
-        self.mutations_shape = mutations_shape
         self.print_debug("population_shape:", population.shape)
-        self.print_debug("mutation_shape:", self.mutations_shape)
+        self.print_debug("mutation_shape:", mutations_shape)
 
         # compute the fancy indexing dynamlically
         # ! the start point must be randomized
         slices = [slice(0, num_reversed_chromosomes)]
-        for idx, crossover_size in enumerate(self.mutations_shape[1:]):
+        for idx, crossover_size in enumerate(mutations_shape[1:]):
             # ! making indexing explicit as its a huge pitfall
             mutation_dim = idx + 1
             max_start = population.shape[mutation_dim] - crossover_size + 1
-            start = B.randint(0, max_start, 1)[0]
+            start = B.randint(0, max_start)
+            # start = random.randint(0, max_start)
             slices.append(slice(start, crossover_size + start))
-
         slices = tuple(slices)
-        self.print_debug(slices)
+        tslices = slices2array(slices)
+        self.print_debug('slices', slices)
 
         # revesing
         reversed_population = population[slices]
@@ -96,7 +104,9 @@ class Reverse(OP):
         reversed_population = B.reverse(reversed_population, axis)
         self.print_debug('reversed population', reversed_population)
 
-        population = B.assign(population, reversed_population, slices)
+        # assigning
+        population = B.assign(population, reversed_population, tslices)
+
         return population
 
 
@@ -146,17 +156,32 @@ class Reverse3D(Reverse):
 
 if __name__ == '__main__':
     from copy import copy
-    GENOME_SHAPE = (6, 4, 4)
-    population = B.randint(0, 256, GENOME_SHAPE)
+    from termcolor import cprint
+    from evoflow.utils import micro_op_bench
+
+    NUM_TESTS = 60  # 100
+    # pop_shape = (100, 100, 100)
+    pop_shape = (100, 10, 10)
+    population = B.randint(0, 256, pop_shape)
     population_fraction = 0.5
     max_reverse_probability = (0.5, 0.5)
-    cprint(population[0], 'blue')
+
+    #bench
+    OP = Reverse2D(population_fraction, max_reverse_probability)
+    micro_op_bench(population, OP, NUM_TESTS)
+    quit()
+    GENOME_SHAPE = (6, 4)
+    population = B.randint(0, 256, GENOME_SHAPE)
+    population_fraction = 0.5
+    max_reverse_probability = 0.5
+    cprint(population, 'green')
     original_population = copy(population)
-    population = Reverse2D(population_fraction,
+    # ! population will be shuffle if not debug
+    population = Reverse1D(population_fraction,
                            max_reverse_probability,
                            debug=True)(population)
 
-    cprint(population[0], 'yellow')
+    cprint(population, 'blue')
     # diff matrix
     diff = B.clip(abs(population - original_population), 0, 1)
     print(diff)

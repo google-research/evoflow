@@ -63,8 +63,7 @@ def test_copy(backends):
             assert B.tensor_equal(tensor, tensor2)
 
             # different after modification
-            tensor2 = B.assign(tensor2, 42, slice(2, 3))
-            print(tensor2)
+            tensor2 = B.shuffle(tensor2)
             assert not B.tensor_equal(tensor, tensor2)
 
 

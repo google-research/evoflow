@@ -17,6 +17,10 @@ from evoflow import backend as B
 
 
 class Shuffle(OP):
+
+    O_AUTOGRAPH = True
+    O_XLA = True
+
     def __init__(self, population_fraction, **kwargs):
         """Shuffle genes within the chromsome.
 
@@ -40,11 +44,7 @@ class Shuffle(OP):
         self.population_fraction = population_fraction
         super(Shuffle, self).__init__(**kwargs)
 
-        self.TF_FN = True
-        self.TF_XLA = True
-
     def call(self, population):
-
         # shuffle to make sure  don't hit the same everytime
         if not self.debug:
             population = B.shuffle(population)
@@ -65,33 +65,15 @@ class Shuffle(OP):
 
 if __name__ == '__main__':
     from copy import copy
-    from perfcounters import PerfCounters
-    from termcolor import cprint
+    from evoflow.utils import micro_op_bench
+    NUM_RUNS = 10
     pop_shape = (1000, 1000, 100)
     population = B.randint(0, 256, pop_shape)
     population_fraction = 0.5
 
-    OP = Shuffle(population_fraction, optimization_level=0)
+    OP = Shuffle(population_fraction)
+    micro_op_bench(population, OP, NUM_RUNS)
 
-    TF_OP = Shuffle(population_fraction, optimization_level=1)
-
-    XLA_OP = Shuffle(population_fraction, optimization_level=2)
-
-    # warmup
-    TF_OP(population)
-    XLA_OP(population)
-
-    cprint('[%s micro benchmark]' % str(OP.__class__.__name__), 'yellow')
-
-    ops = [OP, TF_OP, XLA_OP]
-    cnts = PerfCounters()
-    for idx, op in enumerate(ops):
-        cname = 'Optimization level: %d' % idx
-        cnts.start(cname)
-        for _ in range(3):
-            op(population)
-        cnts.stop(cname)
-    cnts.report()
     quit()
 
     GENOME_SHAPE = (6, 4, 4)

@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from evoflow.utils import slices2array
 
 
 def test_roll(backends):
@@ -39,14 +40,39 @@ def test_assign(backends):
     inputs = [[11, 12, 13], [21, 22, 23], [31, 32, 33]]
     values = [[1, 1], [1, 1]]
     slices = (slice(1, 3), slice(1, 3))
+    tslices = slices2array(slices)
 
     expected = [[11, 12, 13], [21, 1, 1], [31, 1, 1]]
 
     for B in backends:
         tval = B.tensor(values)
         tensor = B.tensor(inputs)
-        result = B.assign(tensor, tval, slices)
+        result = B.assign(tensor, tval, tslices)
         expected_tensor = B.tensor(expected)
+        assert B.tensor_equal(result, expected_tensor)
+
+
+def test_assign2d(backends):
+    inputs = [
+        [[11, 12, 13], [21, 22, 23], [31, 32, 33]],
+        [[11, 12, 13], [21, 22, 23], [31, 32, 33]],
+    ]
+    values = [[1, 1], [1, 1]]
+    slices = (slice(0, 1), slice(1, 3), slice(1, 3))
+    tslices = slices2array(slices)
+
+    expected = [
+        [[11, 12, 13], [21, 1, 1], [31, 1, 1]],
+        [[11, 12, 13], [21, 22, 23], [31, 32, 33]],
+    ]
+
+    for B in backends:
+        print('--%s--' % B)
+        tval = B.tensor(values)
+        tensor = B.tensor(inputs)
+        result = B.assign(tensor, tval, tslices)
+        expected_tensor = B.tensor(expected)
+        print(result)
         assert B.tensor_equal(result, expected_tensor)
 
 

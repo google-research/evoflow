@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.5.0
+
+This release focuses on optimizing single GPU/CPU performances to ensure
+that using tensorflow provide compeling benefits compared to numpy.
+
+### Notable improvements and major changes
+
+* Added an Optimization dispatcher that allows ops that support it to leverage
+  [TensorFlow optimization](https://www.tensorflow.org/api_docs/python/tf/function)
+  and [XLA compilation](https://www.tensorflow.org/xla) if they support / benefit it.
+
+* `RandomMutation()` now support TF and XLA optimization.
+
 ## v0.4.1
 
 * Benchmarking system implemented - see `/benchmark/benchmark_analysis.ipynb`

@@ -255,18 +255,25 @@ def roll(tensor, shift, axis):
     return np.roll(tensor, shift, axis)
 
 
-def assign(dst_tensor, values, slices):
+def assign(dst_tensor, updates, indexes):
     """ assign values in tensor at the position specified by the slices.
 
     Args:
         dst_tensor (ndarray): Target tensor
         values (ndarray): Tensor containing the values to assign.
-        slices (tuple): slices that defines where to put the values.
+        indexes (list(list)): python array of the form:
+        [[start][stop], ..., [start][stop]] where len == rank of dst_tensor.
+        MUST be a python array not a tensor.
     Returns:
         ndarray: tensor with the assigned values.
 
     """
-    dst_tensor[slices] = values
+
+    slices = []
+    for s in indexes:
+        slices.append(slice(s[0], s[1]))
+    slices = tuple(slices)
+    dst_tensor[slices] = updates
     return dst_tensor
 
 

@@ -66,4 +66,6 @@ def test_1D_tensor_values_maintained():
     cprint(population, 'yellow')
     for chrm in population:
         _, _, count = B.unique_with_counts(chrm)
+        cprint(count, 'green')
+
         assert B.max(count) == 1

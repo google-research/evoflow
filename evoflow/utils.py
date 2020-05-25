@@ -11,6 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from termcolor import cprint
+from perfcounters import PerfCounters
+from tqdm.auto import tqdm
+import inspect
+
+
+def slices2array(slices):
+    "convert slices into an array. Use for assign"
+    return [[s.start, s.stop] for s in slices]
 
 
 def box(a):
@@ -27,3 +36,60 @@ def unbox(a):
         return a[0]
     else:
         return a
+
+
+def micro_op_bench(population, op, num_runs):
+    cprint('[warn-up]', 'yellow')
+    os = optimization_support(op)
+    max_level = os['optimization_level']
+    cprint('Max optimization level %s' % (max_level), 'magenta')
+    cprint('Optimization status:%s' % os['optimizations'], 'blue')
+
+    cprint('[%s micro benchmark]' % str(op.__class__.__name__), 'yellow')
+
+    total_tests = num_runs * (max_level + 1)
+    pb = tqdm(total=total_tests, desc='running tests', unit='ops')
+    cnts = PerfCounters()
+
+    for level in range(max_level + 1):
+        cname = 'Optimization level: %d' % level
+        op.set_optimization_level(level)
+        # warmup
+        for _ in range(3):
+            op(population)
+
+        # real test
+        cnts.start(cname)
+        for _ in range(num_runs):
+            op(population)
+            pb.update(1)
+        cnts.stop(cname)
+
+    pb.close()
+    cnts.report()
+
+
+def optimization_support(op):
+    "Abstract away optimization support information"
+    optims = {}
+    for m in inspect.getmembers(op):
+        if 'O_' in m[0]:
+            optims[m[0]] = m[1]
+
+    autograph = optims.get('O_AUTOGRAPH', False)
+    xla = optims.get('O_XLA', False)
+
+    if autograph and xla:
+        max_level = 2
+    elif autograph:
+        max_level = 1
+    else:
+        max_level = 0
+
+    return {
+        'optimization_level': max_level,
+        'optimizations': {
+            'autograph': autograph,
+            'xla': xla
+        }
+    }
