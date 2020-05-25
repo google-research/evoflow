@@ -63,14 +63,11 @@ def test_uniformcrossover2d_distribution():
     # ! We need enough iterations and chromosomes to reduce collision
     # ! and ensure numerical stability
     """
-    NUM_ITERATIONS = 1000
+    NUM_ITERATIONS = 300
     GENOME_SHAPE = (20, 4, 4)
     population = B.randint(0, 1024, GENOME_SHAPE)
     population_fraction = 1
     crossover_probability = (0.5, 0.5)
-
-    MIN_DIFF_BOUND = 350
-    MAX_DIFF_BOUND = 650
 
     OP = UniformCrossover2D(population_fraction, crossover_probability)
 
@@ -91,9 +88,9 @@ def test_uniformcrossover2d_distribution():
     for c in diff:
         print(c)
         print('mean', B.mean(c), 'min', B.min(c), 'max', B.max(c))
-        assert B.min(c) > MIN_DIFF_BOUND
-        assert B.max(c) < MAX_DIFF_BOUND
-        assert MIN_DIFF_BOUND < B.mean(c) < MAX_DIFF_BOUND
+        assert B.min(c) > NUM_ITERATIONS // 15
+        assert B.max(c) < NUM_ITERATIONS // 2
+        assert NUM_ITERATIONS // 10 < B.mean(c) < NUM_ITERATIONS // 2
 
 
 def test_ND():

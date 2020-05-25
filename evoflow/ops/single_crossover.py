@@ -68,7 +68,10 @@ class SingleCrossover(OP):
         mutations_shape = [num_crossovers]
         for idx, frac in enumerate(self.max_crossover_probability):
             max_genes = int(population.shape[idx + 1] * frac + 1)
-            num_genes = B.randint(1, high=max_genes)
+            if max_genes > 1:
+                num_genes = B.randint(1, high=max_genes)
+            else:
+                num_genes = 1
             mutations_shape.append(num_genes)
         self.print_debug("mutation_shape: %s" % mutations_shape)
 

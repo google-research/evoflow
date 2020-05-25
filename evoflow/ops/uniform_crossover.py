@@ -68,7 +68,7 @@ class UniformCrossover(OP):
         self.print_debug("num_crossovers %s" % num_crossovers)
 
         # crossover matrix
-        x_matrix = B.zeros(population.shape, dtype=B.intx())
+        x_matrix = B.zeros(population.shape, dtype=population.dtype)
         self.print_debug("Creating x_matrix and mutation_matrix")
 
         # We need to accounting for the fact that the population
@@ -78,12 +78,15 @@ class UniformCrossover(OP):
         mutations_shape = [num_crossovers]
         for idx, frac in enumerate(self.max_crossover_probability):
             max_genes = int(population.shape[idx + 1] * frac + 1)
-            num_genes = B.randint(1, high=max_genes)
+            if max_genes > 1:
+                num_genes = B.randint(1, high=max_genes)
+            else:
+                num_genes = max_genes
             mutations_shape.append(num_genes)
         self.print_debug("mutation_shape: %s" % mutations_shape)
 
         # create tensor
-        mutations = B.ones(mutations_shape, dtype=B.intx())
+        mutations = B.ones(mutations_shape, dtype=population.dtype)
 
         # compute the fancy indexing dynamically
         slices = []

@@ -88,7 +88,7 @@ def test_dualcrossover2d_distribution():
     # ! We need enough iterations and chromosomes to reduce collision
     # ! and ensure numerical stability
     """
-    NUM_ITERATIONS = 1000
+    NUM_ITERATIONS = 300
     GENOME_SHAPE = (100, 4, 4)
     population = B.randint(0, 1024, GENOME_SHAPE)
     population_fraction = 1
@@ -115,6 +115,7 @@ def test_dualcrossover2d_distribution():
     for c in diff:
         print(c)
         print('mean', B.mean(c), 'min', B.min(c), 'max', B.max(c))
-        assert B.min(c) > 50
+        # dual crossover corners have very low numbers
+        assert B.min(c) > 10
         assert B.max(c) < NUM_ITERATIONS // 2
-        assert 200 < B.mean(c) < NUM_ITERATIONS // 2
+        assert NUM_ITERATIONS // 8 < B.mean(c) < NUM_ITERATIONS // 2

@@ -92,4 +92,4 @@ def test_1D_shape():
         num_ones_in_col = max(list(col).count(1), num_ones_in_col)
 
     max_one_in_col = POPULATION_SHAPE[0] * population_fraction
-    assert max_one_in_col - 2 <= num_ones_in_col <= max_one_in_col
+    assert max_one_in_col - 3 <= num_ones_in_col <= max_one_in_col
