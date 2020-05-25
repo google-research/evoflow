@@ -18,7 +18,7 @@ from evoflow import backend as B
 
 
 class SingleCrossover(OP):
-    O_AUTOGRAPH = True
+    O_AUTOGRAPH = False
     O_XLA = False
 
     def __init__(self, population_fraction, max_crossover_probability,
