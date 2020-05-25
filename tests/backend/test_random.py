@@ -99,8 +99,10 @@ def test_full_shuffle(backends):
 
 def test_randint_1D(backends):
     for B in backends:
+        print(B)
         t = B.randint(0, 11, shape=10)
-        assert t.shape == (10, )
+        print(t)
+        assert len(t) == 10
         assert B.max(t) <= 10
         assert B.min(t) >= 0
 

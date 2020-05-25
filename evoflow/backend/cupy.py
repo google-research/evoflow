@@ -19,6 +19,19 @@ import numpy  # DON'T IMPORT AS np -- make it hard to distinguish with cupy.
 from .common import _infer_dtype, intx, floatx
 
 
+def _cast_shape(shape):
+    "cupy is picky about the shape so casting it"
+    if isinstance(shape, int):
+        shape_clean = (shape, )
+    elif shape:
+        shape_clean = []
+        for v in shape:
+            shape_clean.append(int(v))
+    else:
+        shape_clean = None
+    return shape_clean
+
+
 # -initialization-
 def tensor(a, dtype=None):
     """Converts an object to a tensor.
@@ -79,6 +92,9 @@ def ones(shape, dtype=floatx()):
         ndarray: An tensor filled with zeros.
 
     """
+    from termcolor import cprint
+
+    shape = _cast_shape(shape)
     return cp.ones(shape, dtype=dtype)
 
 
@@ -130,7 +146,7 @@ def range(start, stop=None, step=1, dtype=intx()):
 
 
 # - Reduce -
-def prod(tensor, axis=None, keepdims=False):
+def prod(t, axis=None, keepdims=False):
     """Returns the product of an array along a given axis.
 
     Args:
@@ -144,7 +160,9 @@ def prod(tensor, axis=None, keepdims=False):
     Returns:
         ndarray: The maximum of ``tensor``, along the axis if specified.
     """
-    return cp.prod(tensor, axis=axis, keepdims=keepdims)
+    if not is_tensor(t):
+        t = tensor(t)
+    return cp.prod(t, axis=axis, keepdims=keepdims)
 
 
 def max(tensor, axis=None, keepdims=False):
@@ -573,6 +591,8 @@ def randint(low, high=None, shape=None, dtype='l'):
         sampled. If size is integer, it is the 1D-array of length size
         element. Otherwise, it is the array whose shape specified by size.
     """
+
+    shape = _cast_shape(shape)
     return cp.random.randint(low, high=high, size=shape, dtype=dtype)
 
 

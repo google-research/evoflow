@@ -8,6 +8,7 @@ def test_randintpop():
     assert pop.shape == shape
     assert B.max(pop) == 42
     assert B.min(pop) == 1
+    assert pop.dtype == B.intx()
 
 
 def test_uniformpop():

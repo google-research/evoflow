@@ -39,7 +39,8 @@ def test_helloworld():
     gf.summary()
     results = gf.evolve(population,
                         generations=NUM_EVOLUTIONS,
-                        callbacks=[DummyCallback()])
+                        callbacks=[DummyCallback()],
+                        verbose=0)
     assert results
 
     metrics = results.get_metrics_history()

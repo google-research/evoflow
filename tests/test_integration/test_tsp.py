@@ -76,8 +76,8 @@ def tsp_setup(num_cities):
 
 
 def test_solve_tsp():
-    population_shape = (100, 10)
-    generations = 30
+    population_shape = (150, 10)
+    generations = 40
 
     cities, chart_data, distances, idx2city = tsp_setup(10)
     BASELINE = 6000
