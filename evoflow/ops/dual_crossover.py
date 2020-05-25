@@ -19,8 +19,8 @@ from evoflow import backend as B
 
 class DualCrossover(OP):
 
-    TF_AUTOGRAPH = True
-    TF_XLA = False
+    O_AUTOGRAPH = True
+    O_XLA = False
 
     def __init__(self, population_fraction, max_crossover_probability,
                  **kwargs):
@@ -54,10 +54,6 @@ class DualCrossover(OP):
         self.population_fraction = population_fraction
         self.max_crossover_probability = max_crossover_probability
         super(DualCrossover, self).__init__(**kwargs)
-
-        # Turning on supported optimizations
-        self.enable_autograph(True)
-        self.enable_xla_compilation(True)
 
     def call(self, population):
 
@@ -147,9 +143,9 @@ class DualCrossover3D(DualCrossover):
 
 if __name__ == '__main__':
     from copy import copy
-    from perfcounters import PerfCounters
+    from evoflow.utils import op_optimization_benchmark
     from termcolor import cprint
-    NUM_TESTS = 20
+    NUM_RUNS = 3
     pop_shape = (100, 200, 100)
     population = B.randint(0, 256, pop_shape)
     population_fraction = 0.5
@@ -158,31 +154,7 @@ if __name__ == '__main__':
     OP = DualCrossover2D(population_fraction,
                          max_reverse_probability,
                          optimization_level=0)
-
-    TF_OP = DualCrossover2D(population_fraction,
-                            max_reverse_probability=max_reverse_probability,
-                            optimization_level=1)
-
-    XLA_OP = DualCrossover2D(population_fraction,
-                             max_reverse_probability,
-                             optimization_level=2)
-
-    # warmup
-    OP(population)
-    TF_OP(population)
-    XLA_OP(population)
-
-    cprint('[%s micro benchmark]' % str(OP.__class__.__name__), 'yellow')
-
-    ops = [OP, TF_OP, XLA_OP]
-    cnts = PerfCounters()
-    for idx, op in enumerate(ops):
-        cname = 'Optimization level: %d' % idx
-        cnts.start(cname)
-        for _ in range(NUM_TESTS):
-            op(population)
-        cnts.stop(cname)
-    cnts.report()
+    op_optimization_benchmark(population, OP, NUM_RUNS).report()
     quit()
     GENOME_SHAPE = (6, 4, 4)
     population = B.randint(0, 256, GENOME_SHAPE)
