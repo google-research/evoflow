@@ -14,6 +14,7 @@
 
 from .op import OP
 import evoflow.backend as B
+from evoflow.utils import box
 
 
 class Input(OP):
@@ -31,6 +32,7 @@ class Input(OP):
         """
         self.shape = shape
         super(Input, self).__init__(**kwargs)
+        self.OPTIMIZE_LEVEL = 0  # input don't support optimzation
 
     def get_output_shapes(self):
         "return the shape of tensor returned by the op"
@@ -46,6 +48,9 @@ class Input(OP):
                 'Incompatible input shape expected: %s - got: %s' %
                 (self.shape, chromosomes.shape))
         self.chromosomes = chromosomes
+
+    def dispatch(self, populations, mode):
+        return box(self.call(populations))
 
     def call(self, unused):
         "make it compatible with other ops"

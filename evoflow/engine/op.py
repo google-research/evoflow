@@ -87,8 +87,8 @@ class OP(object):
     def _call_from_graph(self, populations):
         "Function called during graph executions"
         populations = box(populations)
-        results = self.dispatch(populations, self.GRAPH)
-        return unbox(results)
+        # dispatch take care of iterating through populations
+        return unbox(self.dispatch(populations, self.GRAPH))
 
     def dispatch(self, populations, mode):
         """Fan-out populations and call the most efficient compute method based
@@ -113,7 +113,6 @@ class OP(object):
                          self.OPTIMIZE_LEVEL)
 
         if not self.OPTIMIZE_LEVEL or not self.TF:
-            # cprint("no optim", 'green')
             self.print_debug('Optimization disabled or not TF')
             fn = self.call
         else:
@@ -132,7 +131,6 @@ class OP(object):
         # FIXME: explore using a parallel map here
         results = []
         for population in populations:
-            # no optimization
             results.append(fn(population))
         return results
 
@@ -182,11 +180,8 @@ class OP(object):
                 input_shapes.append(op.shape)
             self.compute_output_shape(input_shapes)
 
-            # compute concrete results
-            results = self.dispatch(ops, self.EAGER)
-
-            # unbox result if needed
-            return unbox(results)
+            # compute concrete results - dispatch iterate through populations.
+            return unbox(self.dispatch(ops, self.EAGER))
 
     def compute_output_shape(self, input_shapes):
         """Compute output shapes

@@ -24,7 +24,7 @@ from evoflow.callbacks import DummyCallback
 def test_helloworld():
     "Solve the MAXONE problem"
     NUM_EVOLUTIONS = 10
-    SHAPE = (512, 1024)
+    SHAPE = (20, 20)
     MAX_VAL = 1
 
     population = randint_population(SHAPE, MAX_VAL)

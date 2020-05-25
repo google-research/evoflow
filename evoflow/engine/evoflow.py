@@ -21,8 +21,7 @@ from tqdm.auto import tqdm
 from evoflow.utils import box
 from evoflow.io import print_debug
 from .results import Results
-
-import tensorflow as tf
+from termcolor import cprint
 
 
 class EvoFlow(object):
@@ -85,9 +84,6 @@ class EvoFlow(object):
         self.compiled = True
 
         self._results = Results(debug=self.debug)
-
-    def history(self):
-        return self._history
 
     def evolve(self, populations, generations=1, callbacks=None, verbose=1):
 
@@ -198,13 +194,14 @@ class EvoFlow(object):
         for op_idx in self.execution_path:
             op = self.idx2op[op_idx]
 
-            self.print_debug('|- %s(%s)' %
-                             (op.idx, self.idx2input_idx[op.idx]))
+            self.print_debug('%s(%s)' % (op.idx, self.idx2input_idx[op.idx]))
 
             # fetching inputs values
             inputs = []
             for input_idx in self.idx2input_idx[op_idx]:
                 inputs.append(self.idx2results[input_idx])
+
+            # execute the op
             self.idx2results[op_idx] = op._call_from_graph(inputs)
 
         self.print_debug('idx2results:', self.idx2results.keys())
@@ -245,11 +242,6 @@ class EvoFlow(object):
             rows.append([op_info, op_shape, inputs])
         print(tabulate(rows, headers=['OP (type)', 'Output Shape', 'Inputs']))
 
-    def print_debug(self, *msg):
-        "output debug message"
-        if self.debug:
-            print_debug('GeneFlow', *msg)
-
     def _add_op_to_graph(self, op, output_op=None, debug=0):
         """
         Recursively insert nodes in the DAG
@@ -279,3 +271,11 @@ class EvoFlow(object):
 
             self.graph.add_edge(in_op.idx, op.idx)
             self._add_op_to_graph(in_op, op, self.debug)  # up the chain
+
+    def print_debug(self, *msg):
+        "output debug message"
+        if self.debug:
+            print_debug('GeneFlow', *msg)
+
+    def history(self):
+        return self._history

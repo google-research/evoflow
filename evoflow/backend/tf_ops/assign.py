@@ -19,7 +19,7 @@ import tensorflow as tf
 # https://github.com/tensorflow/tensorflow/issues/34683
 
 
-# best way so far
+# only working version so far
 def assign(dst_tensor, updates, indexes):
     """ assign values in tensor at the position specified by the slices.
 
@@ -41,9 +41,7 @@ def assign(dst_tensor, updates, indexes):
     num_dims = len(indexes)
     updates = tf.reshape(updates, [-1])
 
-    # passing arr_size is also not working
-    # Not working
-    #  array size
+    #  array size -> doesn't seems to provide any benefits
     arr_size = 1
     for d in indexes:
         arr_size *= (d[1] - d[0])
@@ -78,6 +76,59 @@ def assign(dst_tensor, updates, indexes):
         raise ValueError('Not implemented for rank >2')
 
     indices = indices.stack()  # to tensor
+    return tf.tensor_scatter_nd_update(dst_tensor,
+                                       indices=indices,
+                                       updates=updates)
+
+
+# ! not working tensor placement error again
+def assign_batched_failed(dst_tensor, updates, indexes):
+    """ assign values in tensor at the position specified by the slices.
+
+    Args:
+        dst_tensor (ndarray): Target tensor
+        values (ndarray): Tensor containing the values to assign.
+        indexes (list(list)): python array of the form:
+        [[start][stop], ..., [start][stop]] where len == rank of dst_tensor.
+        MUST be a python array not a tensor.
+
+    Returns:
+        ndarray: tensor with the assigned values.
+
+    """
+    # yes this code is verbose and can be simplified.. however its easier to
+    # keep each case separated for debug and testing optim ideas purpose
+    # it as in autograph simplifies it
+
+    num_dims = len(indexes)
+    updates = tf.reshape(updates, [-1])
+
+    #  array size
+    arr_size = 1
+    for d in indexes[:-1]:
+        arr_size *= (d[1] - d[0])
+
+    v = 0
+    indices = tf.TensorArray(dtype=tf.int32, size=arr_size, dynamic_size=False)
+    # ,element_shape=(num_dims * last_dim_size, ))
+
+    if num_dims == 3:
+        for d1 in tf.range(indexes[0][0], indexes[0][1]):
+            for d2 in tf.range(indexes[1][0], indexes[1][1]):
+
+                # try to minimize the update by batching it
+                update = []
+                for d3 in range(indexes[2][0], indexes[2][1]):
+                    update.append([d1, d2, d3])
+
+                indices = indices.write(v, update)
+                v += 1
+    else:
+        raise ValueError('Not implemented for rank 1 and >4')
+
+    indices = indices.stack()  # to tensor
+    cprint(indices, 'yellow')
+    cprint(indices.shape, 'blue')
     return tf.tensor_scatter_nd_update(dst_tensor,
                                        indices=indices,
                                        updates=updates)

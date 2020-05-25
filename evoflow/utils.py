@@ -38,7 +38,18 @@ def unbox(a):
         return a
 
 
-def micro_op_bench(population, op, num_runs):
+def op_optimization_benchmark(population, op, num_runs, num_warmup=1):
+    """Run OP with the different level of optimization supported and
+    report results as PerfCounters counterts.
+
+    Args:
+        population (tensor): population to run the bench on
+        op (OP): OP to be benchmarked
+        num_runs (int): number of execution to perform.
+
+    Returns:
+        PerfCounters: performance counters for various optimization levels.
+    """
     cprint('[warn-up]', 'yellow')
     os = optimization_support(op)
     max_level = os['optimization_level']
@@ -47,16 +58,18 @@ def micro_op_bench(population, op, num_runs):
 
     cprint('[%s micro benchmark]' % str(op.__class__.__name__), 'yellow')
 
-    total_tests = num_runs * (max_level + 1)
+    total_tests = (num_warmup + num_runs) * (max_level + 1)
     pb = tqdm(total=total_tests, desc='running tests', unit='ops')
     cnts = PerfCounters()
 
     for level in range(max_level + 1):
         cname = 'Optimization level: %d' % level
         op.set_optimization_level(level)
+
         # warmup
-        for _ in range(3):
+        for _ in range(num_warmup):
             op(population)
+            pb.update(1)
 
         # real test
         cnts.start(cname)
@@ -66,11 +79,20 @@ def micro_op_bench(population, op, num_runs):
         cnts.stop(cname)
 
     pb.close()
-    cnts.report()
+    return cnts
 
 
 def optimization_support(op):
-    "Abstract away optimization support information"
+    """Return the level of optimization supported by a given op and
+       which optimizations are supported
+
+    Args:
+        op (OP): the op to analyze
+
+    Returns:
+        dict: optimization info.
+    """
+
     optims = {}
     for m in inspect.getmembers(op):
         if 'O_' in m[0]:

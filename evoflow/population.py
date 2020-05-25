@@ -16,7 +16,7 @@ def randint_population(shape, max_value, min_value=0):
         Tensor: random population.
     """
     high = max_value + 1
-    return B.randint(low=min_value, high=high, shape=shape)
+    return B.randint(low=min_value, high=high, shape=shape, dtype=B.intx())
 
 
 def uniform_population(shape, dtype=B.intx()):
