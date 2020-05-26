@@ -108,6 +108,10 @@ will call `python.exe .\evoflow\ops\random_mutation.py`
 Here is a summary of EvoFlow support for autograph and XLA per OP, a rough
 estimate of the speed-up provided and the tradeoff/ideas on how to push further.
 
+Speed up are expressed relative to the baseline. Accordingly a 2x speedup means
+twice as fast. A fractional speed means it is slower than baseline. E.g 0.1x means 10 times slower than baseline. *As of 0.5 - having an [assign](https://github.com/google-research/evoflow/blob/master/evoflow/backend/tf_ops/assign.py#L79) implementation that is working with `tf.function()`
+if crippling the framework performance. See [issue #55](https://github.com/google-research/evoflow/issues/55)
+
 | OP               |   Status   | autograph | +XLA  | Key bottleneck                         |
 | ---------------- | :--------: | :-------: | :---: | -------------------------------------- |
 | RandomMutation   | 🐢:disabled |   0.3x    |   ☠️   | `assign()` is slow and prevent XLA     |
