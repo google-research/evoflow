@@ -14,7 +14,8 @@
 
 from time import time
 from collections import defaultdict
-import altair as alt
+import altair as alt  # dymamic
+from matplotlib.pylab import plt  # static graph
 from tabulate import tabulate
 import pandas as pd
 import evoflow.backend as B
@@ -53,9 +54,44 @@ class Results(object):
 
     def display_populations(self,
                             top_k=10,
-                            max_chromosome_len=20,
-                            precision=None):
-        """Display the population
+                            max_chromosome_len=1024,
+                            rounding=None):
+
+        for pop_idx, population in enumerate(self._populations):
+            num_chromosomes = min(len(population), top_k)
+            heatmap = []
+            gene_max = 0
+            for cidx, chromosome in enumerate(population):
+                genes = []
+                for gene in chromosome[:max_chromosome_len]:
+                    if isinstance(rounding, type(None)):
+                        genes.append(str(gene))
+                    elif rounding > 0:
+                        genes.append(round(float(gene), rounding))
+                    else:
+                        genes.append(int(gene))
+                    gene_max = max(gene_max, gene)
+                heatmap.append(genes)
+                if cidx > num_chromosomes:
+                    break
+
+            fig, ax = plt.subplots()
+            im = ax.imshow(heatmap, cmap="viridis", vmax=gene_max)
+
+            # gradient bar
+            cbar = ax.figure.colorbar(im, ax=ax)
+            cbar.ax.set_ylabel('Gene value', rotation=-90, va="bottom")
+
+            plt.title(f'Population - top {num_chromosomes}',
+                      fontsize=16,
+                      fontweight='bold')
+            plt.xlabel("Genes")
+            plt.ylabel("Chromosome")
+            # fig.tight_layout()
+            plt.show()
+
+    def top_k(self, top_k=10, max_chromosome_len=20, precision=None):
+        """Display the top k chromosome.
 
         Args:
             top_k (int, optional): Number of chromosomes to display.
@@ -96,13 +132,32 @@ class Results(object):
                     headers=['fit score',
                              'genes [:%d]' % max_chromosome_len]))
 
-    def plot_fitness(self):
+    def plot_fitness(self, static=False):
         """Plots the various metrics"""
-        return self._build_plot('Fitness function')
+        if static:
+            return self._build_plot_static('Fitness function')
+        else:
+            return self._build_plot('Fitness function')
 
-    def plot(self, group_name):
+    def plot(self, group_name, static=False):
         """Plots group metrics"""
-        return self._build_plot(group_name)
+        if static:
+            return self._build_plot_static(group_name)
+        else:
+            return self._build_plot(group_name)
+
+    def _build_plot_static(self, metric_group):
+        metrics = self.get_metrics_history()
+        if metric_group not in metrics:
+            raise ValueError("can't find metric group")
+        for name, values in metrics[metric_group].items():
+            plt.plot(values, label=name)
+        plt.legend(loc='best')
+        plt.title(metric_group, fontsize=16, fontweight='bold')
+        plt.xlabel("Generations")
+        plt.show()
+
+        return None
 
     def _build_plot(self, metric_group):
         "Build an altair plot for a given metric group"
@@ -116,6 +171,7 @@ class Results(object):
             for idx, val in enumerate(values):
                 rows.append({'generation': idx, 'metric': name, 'value': val})
         metrics_pd = pd.DataFrame(rows)
+
         chart = alt.Chart(metrics_pd,
                           title='Fitness function').mark_line().encode(
                               x='generation', y='value',
