@@ -21,12 +21,15 @@ if 'GENEFLOW_BACKEND' in os.environ:
     set_backend(os.environ['GENEFLOW_BACKEND'])
 elif not get_backend():
     # check if we find cupy
-    try:
-        import tensorflow  # noqa: F403, F401
-    except ImportError:
-        set_backend('numpy')
-    else:
-        set_backend('tensorflow')
+    # try:
+    #     import tensorflow  # noqa: F403, F401
+    # except ImportError:
+    #     set_backend('numpy')
+    # else:
+    #     set_backend('tensorflow')
+    sys.stderr.write(
+        'Tensorflow backend disable by default due to issue #55\n')
+    set_backend('numpy')
 
 if get_backend() == 'numpy':
     from .numpy import *  # noqa: F403, F401
