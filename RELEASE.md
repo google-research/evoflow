@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.5.1
+
+### Notable improvements and major changes
+
+* Added static output for visualization so they show up in notebook on github
+* Added partial population heatmap visualization (1D / static only)
+* Move to numpy as default backend until tensorflow performance is resolved
+
 ## v0.5.0
 
 This release focuses on optimizing single GPU/CPU performances to ensure
