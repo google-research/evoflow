@@ -27,7 +27,6 @@ class Results(object):
     def __init__(self, debug=False):
 
         self.start_time = time()
-
         self._populations = None
         self._fitness_scores = None
         self._metrics_latest = defaultdict(dict)  # convinience holder
@@ -126,11 +125,9 @@ class Results(object):
                 if cidx == top_k:
                     break
                 rows.append(row)
-            print(
-                tabulate(
-                    rows,
-                    headers=['fit score',
-                             'genes [:%d]' % max_chromosome_len]))
+
+            headers = ['fit score', 'genes [:%d]' % max_chromosome_len]
+            print(tabulate(rows, headers=headers))
 
     def plot_fitness(self, static=False):
         """Plots the various metrics"""
@@ -172,13 +169,12 @@ class Results(object):
                 rows.append({'generation': idx, 'metric': name, 'value': val})
         metrics_pd = pd.DataFrame(rows)
 
-        chart = alt.Chart(metrics_pd,
-                          title='Fitness function').mark_line().encode(
-                              x='generation', y='value',
-                              color='metric').configure_title(fontSize=16,
-                                                              offset=5,
-                                                              orient='top',
-                                                              anchor='middle')
+        chart = alt.Chart(metrics_pd, title='Fitness function').mark_line()
+        chart.encode(x='generation', y='value', color='metric')
+        chart.configure_title(fontSize=16,
+                              offset=5,
+                              orient='top',
+                              anchor='middle')
         return chart
 
     def get_metrics_history(self):
@@ -210,17 +206,24 @@ class Results(object):
         else:
             return self._metrics_latest
 
-    def record_metrics(self, metrics):
+    def record_metrics(self, metrics_list):
         """Record metrics and track their history
 
         Args:
-            metrics (dict(dict)): group of metrics to track. Of the form:
+            metrics (list(dict(dict))): group of metrics to track. Of the form:
             [group][metric] = float(value)
         """
-        for group, data in metrics.items():
-            for metric, value in data.items():
-                self._metrics_history[group][metric].append(value)
-                self._metrics_latest[group][metric] = value
+
+        for pop_idx, metrics in enumerate(metrics_list):
+
+            for group, data in metrics.items():
+                for name, value in data.items():
+                    # only suffix is more than one population
+                    if len(metrics) > 1:
+                        name += "_%s" % pop_idx
+
+                    self._metrics_history[group][name].append(value)
+                    self._metrics_latest[group][name] = value
 
     def record_fitness(self, fitness_scores):
         """Compute and record fitness related metrics

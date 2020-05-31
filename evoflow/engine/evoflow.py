@@ -130,7 +130,8 @@ class EvoFlow(object):
             self.print_debug(generation_idx, 'evolved pop',
                              evolved_populations)
 
-            fitness_scores_list = []  # keep track of fitness score accros pops
+            fitness_scores_list = []  # keep track of fitness scores
+            metrics_list = []  # keep track of the metrics scores
             for pop_idx in range(num_populations):
                 # find current informaiton
                 current_pop = current_populations[pop_idx]
@@ -143,8 +144,9 @@ class EvoFlow(object):
                 new_population, fitness_scores, metrics = self.selection_strategy(  # noqa
                     fitness_function, current_pop, evolved_pop)
 
-                # update metrics
-                self._results.record_metrics(metrics)
+                # tracks metrics
+                metrics_list.append(metrics)
+                fitness_scores_list.append(fitness_scores)
 
                 # update population tensor
                 self.inputs[pop_idx].assign(new_population)
@@ -152,7 +154,6 @@ class EvoFlow(object):
                 # track current population
                 current_populations[pop_idx] = new_population
                 # record fitness scores
-                fitness_scores_list.append(fitness_scores)
 
             self._results.record_fitness(fitness_scores_list)
 
@@ -214,7 +215,6 @@ class EvoFlow(object):
 
         # collect results
         results = []
-
         for op_idx in self.outputs_idx:
             results.append(self.idx2results[op_idx])
 
