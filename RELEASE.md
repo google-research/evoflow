@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.5.2
+
+### Notable improvements and major changes
+
+* Added Callback API
+
 ## v0.5.1
 
 ### Notable improvements and major changes
