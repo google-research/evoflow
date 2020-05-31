@@ -21,7 +21,7 @@ from tqdm.auto import tqdm
 from evoflow.utils import box
 from evoflow.io import print_debug
 from .results import Results
-from termcolor import cprint
+from .callback_collection import CallbackCollection
 
 
 class EvoFlow(object):
@@ -54,6 +54,7 @@ class EvoFlow(object):
         self.fitness = None
         self.compiled = False
         self._results = None
+        self.callback_collection = None
 
         # storing inputs tensors
         self.inputs = box(inputs)
@@ -91,6 +92,8 @@ class EvoFlow(object):
             raise ValueError("compile() must be run before using the graph")
             return
 
+        self.callback_collection = CallbackCollection(callbacks)
+
         populations = box(populations)
         self.print_debug("Initial Populations", populations)
 
@@ -107,6 +110,9 @@ class EvoFlow(object):
         num_populations = len(current_populations)
         self.print_debug('Initial current_populations', current_populations)
 
+        # callbacks
+        self.callback_collection.on_evolution_begin(current_populations)
+
         # progress bar
         if verbose:
             pb = tqdm(total=generations, unit='generation')
@@ -115,9 +121,7 @@ class EvoFlow(object):
         for generation_idx in range(generations):
 
             # callbacks
-            if callbacks:
-                for callback in callbacks:
-                    callback.on_generation_begin(generation_idx)
+            self.callback_collection.on_generation_begin(generation_idx)
 
             # perform evolution
             evolved_populations = self.perform_evolution()
@@ -155,11 +159,10 @@ class EvoFlow(object):
             latest_metrics = self._results.get_latest_metrics(flatten=True)
 
             # callbacks
-            if callbacks:
-                for callback in callbacks:
-                    callback.on_generation_end(generation_idx, latest_metrics,
-                                               fitness_scores_list,
-                                               populations)
+            self.callback_collection.on_generation_end(generation_idx,
+                                                       latest_metrics,
+                                                       fitness_scores_list,
+                                                       populations)
 
             # progress bar
             if verbose:
@@ -172,6 +175,9 @@ class EvoFlow(object):
 
         if verbose:
             pb.close()
+
+        # final callback
+        self.callback_collection.on_evolution_end(current_populations)
 
         # record last population
         self._results.set_population(current_populations)

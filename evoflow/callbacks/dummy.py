@@ -12,15 +12,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import evoflow.backend as B
 from .callback import Callback
 
 
 class DummyCallback(Callback):
     "Dummy callback used for testing"
 
+    def on_evolution_begin(self, populations):
+        assert isinstance(populations, list)
+        for pop in populations:
+            assert B.is_tensor(pop)
+
+    def on_evolution_end(self, populations):
+        assert isinstance(populations, list)
+        for pop in populations:
+            assert B.is_tensor(pop)
+
     def on_generation_begin(self, generation):
         assert isinstance(generation, int)
 
     def on_generation_end(self, generation, metrics, fitness_scores,
                           populations):
-        pass
+        assert isinstance(generation, int)
+        assert isinstance(metrics, dict)
+        assert isinstance(fitness_scores, dict)
+        assert isinstance(populations, list)
+        for pop in populations:
+            assert B.is_tensor(pop)

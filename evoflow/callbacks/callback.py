@@ -19,6 +19,22 @@ class Callback(object):
     """Abstract base class used to build new callbacks.
  """
     def __init__(self):
+        self.model = None
+
+    def on_evolution_begin(self, populations):
+        """Called at the start of the evolution
+
+        Args:
+            populations (Tensors): Original population
+        """
+        pass
+
+    def on_evolution_end(self, populations):
+        """Called at the end of the evolution
+
+        Args:
+            populations (Tensors): final population
+        """
         pass
 
     def on_generation_begin(self, generation):
@@ -31,12 +47,19 @@ class Callback(object):
 
     def on_generation_end(self, generation, metrics, fitness_scores,
                           populations):
-        """Called at the end of a generation.
+        """Called at the end of each generation.
 
         Args:
-            population (Tensor): populations after the generation evolution.
+            generation (int): Generation index
+            metrics ([type]): dictionnary containing user defined metrics
+            fitness_scores (dict): dictionnary contraining the fitness scores
+            populations (list): evolved populations
         """
         pass
+
+    def set_model(self, model):
+        "Assign current evoflow model"
+        self.model = model
 
     def print_debug(self, *msg):
         "output debug message"
