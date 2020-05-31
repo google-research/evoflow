@@ -75,7 +75,10 @@ class Results(object):
                     break
 
             fig, ax = plt.subplots()
-            im = ax.imshow(heatmap, cmap="viridis", vmax=gene_max)
+            im = ax.imshow(heatmap,
+                           interpolation='nearest',
+                           cmap="viridis",
+                           aspect='auto')
 
             # gradient bar
             cbar = ax.figure.colorbar(im, ax=ax)
