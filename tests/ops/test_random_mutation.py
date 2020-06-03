@@ -16,7 +16,6 @@ from evoflow.ops import RandomMutations1D, RandomMutations2D
 from evoflow.ops import RandomMutations3D
 from evoflow import backend as B
 from evoflow.population import randint_population
-from copy import copy
 from termcolor import cprint
 
 
@@ -49,7 +48,7 @@ def test_mutation2d_eager():
     population = randint_population(pop_shape, max_gene_value)
 
     # save original
-    original_population = copy(population)
+    original_population = B.copy(population)
     cprint('[Initial genepool]', 'blue')
     cprint(original_population, 'blue')
 
@@ -172,11 +171,11 @@ def test_uniform_distribution():
     OP = RandomMutations2D(population_fraction, crossover_probability)
 
     # diff matrix
-    previous_population = copy(population)
+    previous_population = B.copy(population)
     population = OP(population)
     diff = B.clip(abs(population - previous_population), 0, 1)
     for _ in range(NUM_ITERATIONS - 1):
-        previous_population = copy(population)
+        previous_population = B.copy(population)
         population = OP(population)
 
         curr_diff = B.clip(abs(population - previous_population), 0, 1)
