@@ -193,12 +193,11 @@ class OP(object):
             any kind of initialization depending of input shape can be done by
             redefining this function in the children class.
         """
-
         self.output_shapes = input_shapes
 
     def get_output_shapes(self):
         "return the shape of tensor returned by the op"
-        return unbox(self.input_shapes)
+        return unbox(self.output_shapes)
 
     def _gen_idx(self):
         "generate a unique idx"
