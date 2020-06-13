@@ -97,7 +97,7 @@ def set_backend(name):
         `load_backend.py` for the actual loading code.
     """
     global _BACKEND
-    if name not in {'cupy', 'numpy', 'tensorflow'}:
+    if name not in {'cupy', 'numpy', 'tensorflow', 'jax'}:
         raise ValueError('Unknown backend: ' + str(name))
 
     _BACKEND = name

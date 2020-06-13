@@ -27,8 +27,7 @@ elif not get_backend():
     #     set_backend('numpy')
     # else:
     #     set_backend('tensorflow')
-    sys.stderr.write(
-        'Tensorflow backend disable by default due to issue #55\n')
+    sys.stderr.write('Tensorflow backend disable due to issue #55\n')
     set_backend('numpy')
 
 if get_backend() == 'numpy':
@@ -53,5 +52,7 @@ elif get_backend() == 'tensorflow':
 
 elif get_backend() == 'cupy':
     from .cupy import *  # noqa: F403, F401
+elif get_backend() == 'jax':
+    from .jax import *  # noqa: F403, F401
 
 sys.stderr.write('Using %s backend\n' % get_backend())

@@ -32,16 +32,16 @@ else:
 def pytest_configure(config):
     backend = config.option.backend
     if backend:
-        from evoflow.config import set_backend
+        from evoflow.config import set_backend, get_backend
         set_backend(backend)
         cprint('Requested backend: %s' % backend, 'magenta')
     else:
-        cprint("Requested backend: default (tensorflow)", 'magenta')
+        cprint("Requested backend: default %s" % get_backend(), 'magenta')
 
 
 def pytest_addoption(parser):
     parser.addoption("--backend",
-                     help="specify the backend: numpy, cupy, tensorflow")
+                     help="specify the backend: tensorflow, jax, cupy, numpy")
 
 
 @pytest.fixture(scope="session")
