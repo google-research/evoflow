@@ -32,11 +32,11 @@ else:
 def pytest_configure(config):
     backend = config.option.backend
     if backend:
-        from evoflow.config import set_backend, get_backend
+        from evoflow.config import set_backend
         set_backend(backend)
         cprint('Requested backend: %s' % backend, 'magenta')
     else:
-        cprint("Requested backend: default %s" % get_backend(), 'magenta')
+        cprint("Using default backend", 'magenta')
 
 
 def pytest_addoption(parser):
@@ -63,6 +63,15 @@ def backends():
         import evoflow.backend.cupy as CP
 
     try:
+        import jax  # noqa
+        logger.info('jax found')
+    except:  # noqa
+        import evoflow.backend.numpy as JX
+        logger.info('Jax not found - using numpy instead')
+    else:
+        import evoflow.backend.jax as JX
+
+    try:
         import tensorflow  # noqa
         logger.info('TensorFlow found')
     except:  # noqa
@@ -71,4 +80,4 @@ def backends():
     else:
         import evoflow.backend.tensorflow as TF
 
-    return [NP, CP, TF]
+    return [NP, CP, TF, JX]
