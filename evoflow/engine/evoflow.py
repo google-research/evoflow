@@ -229,7 +229,7 @@ class EvoFlow(object):
 
             # inputs
             if len(self.idx2input_idx[op_idx]):
-                inputs = ",".join([o for o in self.idx2input_idx[op_idx]])
+                inputs = ", ".join([o for o in self.idx2input_idx[op_idx]])
             else:
                 inputs = ''
 
@@ -239,14 +239,14 @@ class EvoFlow(object):
             # shape
             op_shape = "%s" % str(op.get_output_shapes())
 
-            # output
-            # if len(self.idx2ouput_ops[op_idx]):
-            #     outputs = ",".join([o for o in self.idx2ouput_ops[op_idx]])  # noqa E501
-            # else:
-            #     outputs = '>>'
+            # size
+            size = op.get_output_size()
 
-            rows.append([op_info, op_shape, inputs])
-        print(tabulate(rows, headers=['OP (type)', 'Output Shape', 'Inputs']))
+            rows.append([op_info, op_shape, size, inputs])
+
+        # display
+        headers = ['OP (type)', 'Output Shape', 'Output size', 'Connected to']
+        print(tabulate(rows, headers=headers, tablefmt='rst'))
 
     def _add_op_to_graph(self, op, output_op=None, debug=0):
         """

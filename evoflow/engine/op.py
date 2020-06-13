@@ -37,6 +37,7 @@ class OP(object):
 
         self.input_ops = []
         self.input_shapes = []  # track tensor size accross the ops.
+        self.output_size = 0  # output tensor size
 
         # optimization flags. They are set by each op based on what they can do
         # and what is the best way to call them. see dispatch()
@@ -193,11 +194,20 @@ class OP(object):
             any kind of initialization depending of input shape can be done by
             redefining this function in the children class.
         """
+        output_size = 1
+        for shape in input_shapes:
+            output_size *= int(B.prod(shape))
+
+        self.output_size = output_size
         self.output_shapes = input_shapes
 
     def get_output_shapes(self):
         "return the shape of tensor returned by the op"
         return unbox(self.output_shapes)
+
+    def get_output_size(self):
+        "return the size of the tensor returned by the op"
+        return self.output_size
 
     def _gen_idx(self):
         "generate a unique idx"

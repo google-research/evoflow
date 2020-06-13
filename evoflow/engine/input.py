@@ -33,10 +33,7 @@ class Input(OP):
         self.shape = shape
         super(Input, self).__init__(**kwargs)
         self.OPTIMIZE_LEVEL = 0  # input don't support optimzation
-
-    def get_output_shapes(self):
-        "return the shape of tensor returned by the op"
-        return self.shape
+        self.compute_output_shape(shape)
 
     def assign(self, chromosomes):
         """Assign concrete values to the input
