@@ -39,7 +39,7 @@ def test_uniform_2Dcrossover_randomness_shape():
     num_mutations = len(mutated_chromosomes)
 
     # sometime we have a collision so we use a delta
-    assert abs(num_mutations - expected_mutations) < 2
+    assert abs(num_mutations - expected_mutations) =< 2
 
     mutated_rows = crossover_probability[0] * GENOME_SHAPE[1]
     mutated_cells = crossover_probability[0] * GENOME_SHAPE[2]
