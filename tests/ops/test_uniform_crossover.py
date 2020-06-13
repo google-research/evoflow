@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import evoflow.backend as B
-from copy import copy
 from evoflow.ops import UniformCrossover1D, UniformCrossover2D
 from evoflow.ops import UniformCrossover3D
 
@@ -24,7 +23,7 @@ def test_uniform_2Dcrossover_randomness_shape():
     population_fraction = 0.5
     crossover_probability = (0.5, 0.5)
 
-    original_population = copy(population)
+    original_population = B.copy(population)
     OP = UniformCrossover2D(population_fraction, crossover_probability)
     population = OP(population)
 
@@ -72,11 +71,11 @@ def test_uniformcrossover2d_distribution():
     OP = UniformCrossover2D(population_fraction, crossover_probability)
 
     # diff matrix
-    previous_population = copy(population)
+    previous_population = B.copy(population)
     population = OP(population)
     diff = B.clip(abs(population - previous_population), 0, 1)
     for _ in range(NUM_ITERATIONS - 1):
-        previous_population = copy(population)
+        previous_population = B.copy(population)
         population = OP(population)
 
         curr_diff = B.clip(abs(population - previous_population), 0, 1)
