@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# issues
+# 1. jax.random.shuffle is depracted but jax.permutation don't support axis
+
 from time import time
 import jax
 # ! DO NOT use import jax.numpy as np to avoid confusing backend
@@ -56,7 +59,9 @@ def copy(tensor):
     Returns
         ndarray: copied tensor
     """
-    return jxnp.copy(tensor)
+    # unusure if that is enough  -- assumed so given that
+    # every other op copy tensor
+    return tensor
 
 
 def zeros(shape, dtype=floatx()):
@@ -547,7 +552,7 @@ def norm(tensor, ord=None, axis=None, keepdims=False):
 # - Randomness -
 
 
-def randint(low, high=None, shape=None, dtype=intx):
+def randint(low, high=None, shape=None, dtype=intx()):
     """Returns a scalar or an array of integer values over [low, high)
 
     Args:
