@@ -15,7 +15,6 @@
 # import os
 # os.environ['evoflow_BACKEND'] = 'numpy'
 from termcolor import cprint
-from copy import copy
 from evoflow import backend as B
 from evoflow.ops import DualCrossover1D, DualCrossover2D
 from evoflow.ops import DualCrossover3D
@@ -60,7 +59,7 @@ def test_crossover1D_output_shape():
     population_fraction = 0.5
     mutations_probability = 0.2
 
-    original_population = copy(population)
+    original_population = B.copy(population)
     population = DualCrossover1D(population_fraction,
                                  mutations_probability,
                                  debug=True)(population)
@@ -97,13 +96,13 @@ def test_dualcrossover2d_distribution():
     OP = DualCrossover2D(population_fraction, crossover_probability)
 
     # diff matrix
-    previous_population = copy(population)
+    previous_population = B.copy(population)
     population = OP(population)
     diff = B.clip(abs(population - previous_population), 0, 1)
     print(diff)
 
     for _ in range(NUM_ITERATIONS - 1):
-        previous_population = copy(population)
+        previous_population = B.copy(population)
         population = OP(population)
 
         curr_diff = B.clip(abs(population - previous_population), 0, 1)

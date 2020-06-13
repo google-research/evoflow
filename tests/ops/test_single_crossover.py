@@ -15,7 +15,6 @@
 # import os
 # os.environ['evoflow_BACKEND'] = 'numpy'
 
-from copy import copy
 from termcolor import cprint
 from evoflow import backend as B  # noqa: F402
 from evoflow.ops import SingleCrossover1D, SingleCrossover2D
@@ -61,7 +60,7 @@ def test_1D_shape():
     population_fraction = 0.5
     crossover_size_fraction = 0.2
 
-    original_population = copy(population)
+    original_population = B.copy(population)
     population = SingleCrossover1D(population_fraction,
                                    crossover_size_fraction,
                                    debug=1)(population)
